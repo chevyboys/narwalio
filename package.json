@@ -1,0 +1,19 @@
+{
+    "name": "Narwalio",
+    "version": "2.0.0",
+    "description": "Emotional support hitBot and generally fun guy",
+    "main": "bot.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "author": "Nicholasc",
+    "license": "ISC",
+    "dependencies": {
+        "augurbot": "^2.1.2",
+        "colors": "^0.6.2",
+        "cron": "^1.8.2",
+        "discord.js": "^12.5.1",
+        "forever": "^3.0.4",
+        "mongoose": "^5.11.17"
+    }
+}
