@@ -20,6 +20,12 @@ function runTag(msg) {
           .replace(/<@targetname>/ig, target.displayName);
       } else return msg.reply("You need to `@mention` a user with that command!").then(u.clean);
     }
+    if ((/(<delete>)|(<del>)/i).test(response)) {
+      let mentions = u.userMentions(msg, true);
+        response = response.replace(/<del>/ig, "")
+          .replace(/<delete>/ig, "");
+          u.clean(msg);
+    }
     if (tag.attachment) {
       msg.channel.send(
         response,
@@ -68,7 +74,7 @@ const Module = new Augur.Module().addCommand({
 aliases: ["addtag"],
 category: "Server Admin",
 syntax: "<Command Name> <Command Response>",
-description: "Adds a custom command for your server.",
+description: "Adds a custom command for your server. The command response can contain @ mentions and other varables as follows:\n <@author> - will be replaced with the message author \n <@authorname> will be replaced with the author's nick name \n <@target> will be replaced with the first @ ed user, \n <@targetname> will be replaced with the first @ed user's username",
 info: "Adds a custom command for your server. If the command has the same name as one of the default commands, the custom command will override the default functionality.",
 process: async (msg, suffix) => {
   try {

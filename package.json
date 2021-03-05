@@ -1,6 +1,6 @@
 {
     "name": "Narwalio",
-    "version": "2.0.0",
+    "version": "2.3.1",
     "description": "Emotional support hitBot and generally fun guy",
     "main": "bot.js",
     "scripts": {
@@ -10,11 +10,13 @@
     "license": "ISC",
     "dependencies": {
         "augurbot": "^2.1.2",
+        "aws4": "^1.11.0",
         "colors": "^0.6.2",
         "cron": "^1.8.2",
         "discord.js": "^12.5.1",
         "forever": "^3.0.4",
         "fs": "0.0.1-security",
-        "mongoose": "^5.11.17"
+        "mongoose": "^5.11.17",
+        "request": "^2.88.2"
     }
 }
