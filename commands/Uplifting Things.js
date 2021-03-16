@@ -36,7 +36,7 @@ function loadCuties(msg, suffix, subreddit, limit) {
 }
 
 async function postRandomCutie(urls, msg, timeout) {
-    let randomURL = urls[Math.floor(Math.random() * urls.length) + 1];
+    let randomURL;
     do {
         randomURL = urls[Math.floor(Math.random() * urls.length) + 1];
         if (randomURL && randomURL.title.indexOf("date") > -1) {
@@ -44,7 +44,7 @@ async function postRandomCutie(urls, msg, timeout) {
             randomURL = urls[Math.floor(Math.random() * urls.length) + 1];
         }
         if (randomURL.title.length > 255) randomURL.title = randomURL.title.substring(0, 255);
-    } while (!randomURL);
+    } while (!randomURL || randomURL == undefined);
     const embed = u.embed().setImage(randomURL.url).setTitle("From Reddit: " + randomURL.title).setURL(`https://reddit.com${randomURL.permalink}`).setFooter(`${randomURL.num_comments} comments, ${randomURL.ups} upvotes, posted by ${randomURL.author}`).setTimestamp((randomURL.created - 7 * 60 * 60) * 1000);
 
     try {

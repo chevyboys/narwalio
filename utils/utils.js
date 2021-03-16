@@ -40,7 +40,7 @@ const Utils = {
         }
         catch (error) { Utils.errorHandler(error, "Confirmation Prompt"); }
     },
-    embed: (data) => new Discord.MessageEmbed(data).setColor(config.color).setTimestamp(),
+    embed: (data, color) => new Discord.MessageEmbed(data).setColor(color || config.color).setTimestamp(),
     errorHandler: function (error, msg = null) {
         if (!error) return;
 
