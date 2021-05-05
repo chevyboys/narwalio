@@ -20,8 +20,7 @@ function runTag(msg) {
           .replace(/<@targetname>/ig, target.displayName);
       } else return msg.reply("You need to `@mention` a user with that command!").then(u.clean);
     }
-    if ((/(<delete>)|(<del>)/i).test(response)) {
-      let mentions = u.userMentions(msg, true);
+    if ((/(<delete>)|(<del>)/i).test(response)) { 
         response = response.replace(/<del>/ig, "")
           .replace(/<delete>/ig, "");
           u.clean(msg);

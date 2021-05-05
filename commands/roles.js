@@ -48,6 +48,7 @@ const Module = new Augur.Module()
 .addCommand({name: "inventory",
   description: "Check your color inventory.",
   category: "Members",
+  aliases: ["flex"],
   permissions: (msg) => true,
   process: async (msg) => {
     try {
