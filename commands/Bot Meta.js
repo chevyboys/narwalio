@@ -195,7 +195,26 @@ const Module = new Augur.Module()
             });
             u.log(msg);
         } // required
-    }).addCommand({
+    })/**/.addInteraction({
+        id: "839655445911044139",
+        process: async (interaction) => {
+            let time = Date.now();
+            interaction._call(`/interactions/${interaction.id}/${interaction.token}/callback`, {type: 1}, "post");
+            interaction.channel.send(`pinging...`).then(m => {
+              m.edit(`pong! Took ${m.createdTimestamp - time}ms`);
+            });
+        },
+        category: "Bot Meta",
+        description: "Checks to see if the bot is online, and what the current response time is.",
+        enabled: true,
+        hidden: false,
+        info: "",
+        name: "ping",
+        options: {},
+        permissions: async (interaction) => {return true},
+        syntax: ""
+      }) /**/
+      .addCommand({
         name: "schedule", // required
         description: "runs a command at a specified time", // recommended
         info: "", // recommended
