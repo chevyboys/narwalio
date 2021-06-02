@@ -18,7 +18,7 @@ const Module = new Augur.Module()
                 data.push(`\`\`\`diff\n- FEEDBACK: ${msg.author.username} says:`);
                 data.push(suffix);
                 data.push(`\`\`\``);
-                msg.client.channels.cache.get(msg.client.config.devLogs.feedbackChannel.id).send(data.join(" "), { split: true })
+                Module.client.channels.cache.get(Module.client.config.devLogs.feedbackChannel.id).send(data.join(" "), { split: true })
                     .then(() => {
                         msg.react('👍');
                     })
@@ -28,7 +28,40 @@ const Module = new Augur.Module()
                 /**/
             }
         }
-    }).addCommand({
+    })
+        //interaction id: 839688794084212777
+        .addInteraction({
+            id: "839688794084212777",
+            process: async (interaction) => {
+                /*
+                    const data = [];
+                    data.push(`\`\`\`diff\n- FEEDBACK: ${msg.author.username} says:`);
+                    data.push(interaction.data);
+                    data.push(`\`\`\``);
+                    Module.client.channels.cache.get(Module.client.config.devLogs.feedbackChannel.id).send(data.join(" "), { split: true })
+                        .then(() => {
+                            msg.react('👍');
+                        })
+                        .catch(error => {
+                            u.errorHandler(`I wasn't able to do that.`, error);
+                        });
+                    /**/
+                interaction.createResponse(await interaction.options.map(o => o.feedback));
+                
+                //console.log(interaction.options.map(o => o.feedback));
+                
+            },
+            category: "Bot Meta",
+            description: "Sends feedback to the bot devs",
+            enabled: true,
+            hidden: false,
+            info: "",
+            name: "feedback",
+            options: {},
+            permissions: async (interaction) => {return true},
+            syntax: ""
+          })
+    .addCommand({
         name: "help",
         description: "Get a list of available commands or more indepth info about a single command.",
         syntax: "[command name] -b (-b to broadcast in the current channel, optional)",
@@ -142,7 +175,27 @@ const Module = new Augur.Module()
             msg.channel.send(holyMessage);
             u.log(msg);
         } // required
-    }).addCommand({
+    })
+    .addInteraction({
+        id: "839674675550617610",
+        process: async (interaction) => {
+            let time = Date.now();
+            //interaction.defer();
+            
+            interaction.createResponse(`See my repo here! https://github.com/chevyboys/narwalio/`);
+            
+        },
+        category: "Bot Meta",
+        description: "Checks to see if the bot is online, and what the current response time is.",
+        enabled: true,
+        hidden: false,
+        info: "",
+        name: "git",
+        options: {},
+        permissions: async (interaction) => {return true},
+        syntax: ""
+      })
+    .addCommand({
         name: "iamyourdev", // required
         description: "Makes someone a narwalio developer", // recommended
         info: "", // recommended
@@ -199,9 +252,10 @@ const Module = new Augur.Module()
         id: "839655445911044139",
         process: async (interaction) => {
             let time = Date.now();
-            interaction._call(`/interactions/${interaction.id}/${interaction.token}/callback`, {type: 1}, "post");
+            //interaction.defer();
             interaction.channel.send(`pinging...`).then(m => {
-              m.edit(`pong! Took ${m.createdTimestamp - time}ms`);
+                 m.delete();
+                interaction.createResponse(`pong! Took ${m.createdTimestamp - time}ms`);
             });
         },
         category: "Bot Meta",
@@ -213,7 +267,8 @@ const Module = new Augur.Module()
         options: {},
         permissions: async (interaction) => {return true},
         syntax: ""
-      }) /**/
+      })
+       /**/
       .addCommand({
         name: "schedule", // required
         description: "runs a command at a specified time", // recommended

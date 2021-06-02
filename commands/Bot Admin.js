@@ -1,11 +1,52 @@
-/* this category is for commands that are restricted to bot devs, that relate to editing the bot or testing*/ 
+/* this category is for commands that are restricted to bot devs, that relate to editing the bot or testing*/
 const Augur = require("augurbot");
 const u = require('../utils/utils');
 const Module = new Augur.Module();
 const path = require("path");
 const config = require('../config/config.json');
-const { Message } = require("discord.js");
+const { Message, MessageEmbed } = require("discord.js");
 const fs = require("fs");
+const axios = require("axios").default;
+
+
+async function sendDiscordStatus(msg, embed, verbose) {
+    try {
+        let discordStatus = await axios.get("https://srhpyqt94yxb.statuspage.io/api/v2/summary.json");
+        let incidents = discordStatus.data.incidents;
+        discordStatus = discordStatus.data.components;
+        for (const component of discordStatus) {
+            if (component.status != "operational" || verbose) {
+                let emoji;
+                switch (component.status) {
+                    case "operational":
+                        emoji = "🟢"
+                        break;
+                    case "partial_outage":
+                        emoji = "🟡";
+                        break;
+                    case "major_outage":
+                        emoji = "🟠";
+                    default:
+                        emoji = "🔴";
+                        break;
+                }
+                embed.addField(`${emoji} ${component.name}`, `**Status**: ${component.status}`, true);
+            }
+        }
+        for (const incident of incidents) {
+            if (incident.resolved_at == null) {
+                embed.addField(`❗__${incident.name}__❗`, `**Status**: ${incident.status}\n**Impact:** ${incident.impact}\n**Last Update:** ${incident.incident_updates[0].updated_at} \n\t${incident.incident_updates[0].body}`);
+
+            }
+        }
+    } catch (error) {
+        embed.addField(`Discord Components:`, `Unavailable`);
+        u.log(error);
+    }
+    msg.channel.send({ embed: embed });
+}
+
+
 Module.addCommand({
     name: "Sudo", // required
     aliases: ["sudox"], // optional
@@ -54,6 +95,52 @@ Module.addCommand({
             } catch (e) { u.errorHandler(e, msg); }
         },
         permissions: (msg) => config.adminId.includes(msg.author.id) || config.ownerId == msg.author.id
+    }).addCommand({
+        name: "message",
+        category: "Bot Admin",
+        hidden: true,
+        description: "message a person",
+        syntax: "[@target]\n[messge]",
+        aliases: ["msg", "message"],
+        process: (msg, suffix) => {
+            let messageToSend = suffix.split("\n")[1];
+            for (const recepient in msg.mentions.users) {
+                if (recepient) {
+                    // Now we get the member from the user
+                    const member = message.guild.member(recepient);
+                    // If the member is in the guild
+                    if (member) {
+                        /**
+                         * message the member
+                         * Make sure you run this on a member, not a user!
+                         * There are big differences between a user and a member
+                         */
+                        member
+                            .send(messageToSend)
+                            .then(() => {
+                                // We let the message author know we were able to message the person
+                                message.reply(`Successfully messaged ${user.tag}`);
+                            })
+                            .catch(err => {
+                                // An error happened
+                                // This is generally due to the bot not being able to message the member,
+                                // either due to missing permissions or role hierarchy
+                                message.reply('I was unable to message the member');
+                                // Log the error
+                                u.log(err);
+                            });
+                    } else {
+                        // The mentioned user isn't in this guild
+                        message.reply("That user isn't in this guild!");
+                    }
+                    // Otherwise, if no user was mentioned
+                } else {
+                    message.reply("You didn't mention the user to message!");
+                }
+            }
+            msg.react("👌");
+        },
+        permissions: (msg) => (config.adminId.includes(msg.author.id) || config.ownerId == msg.author.id)
     })
     .addCommand({
         name: "playing",
@@ -127,17 +214,15 @@ Module.addCommand({
                         .addField("Shard Uptime", `${Math.floor(client.uptime / (24 * 60 * 60 * 1000))} days, ${Math.floor(client.uptime / (60 * 60 * 1000)) % 24} hours, ${Math.floor(client.uptime / (60 * 1000)) % 60} minutes`, true)
                         .addField("Shard Commands Used", `${client.commands.commandCount} (${(client.commands.commandCount / (client.uptime / (60 * 1000))).toFixed(2)}/min)`, true)
                         .addField("Total Memory", `${mem}MB`, true);
-
-                    msg.channel.send({ embed: embed });
+                    sendDiscordStatus(msg, embed, (suffix.indexOf('verbose') > -1));
                 } else {
                     let uptime = process.uptime();
                     embed
                         .addField("Uptime", `Discord: ${Math.floor(client.uptime / (24 * 60 * 60 * 1000))} days, ${Math.floor(client.uptime / (60 * 60 * 1000)) % 24} hours, ${Math.floor(client.uptime / (60 * 1000)) % 60} minutes\nProcess: ${Math.floor(uptime / (24 * 60 * 60))} days, ${Math.floor(uptime / (60 * 60)) % 24} hours, ${Math.floor(uptime / (60)) % 60} minutes`, true)
                         .addField("Reach", `${client.guilds.cache.size} Servers\n${client.channels.cache.size} Channels\n${client.users.cache.size} Users`, true)
                         .addField("Commands Used", `${client.commands.commandCount} (${(client.commands.commandCount / (client.uptime / (60 * 1000))).toFixed(2)}/min)`, true)
-                        .addField("Memory", `${Math.round(process.memoryUsage().rss / 1024 / 1000)}MB`, true);
-
-                    msg.channel.send({ embed: embed });
+                        .addField("Memory", `${Math.round(process.memoryUsage().rss / 1024 / 1000)}MB`, false);
+                    sendDiscordStatus(msg, embed, (suffix.indexOf('verbose') > -1));
                 }
             } catch (e) { u.errorHandler(e, msg); }
         }

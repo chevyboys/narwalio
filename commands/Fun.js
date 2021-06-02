@@ -344,7 +344,7 @@ Module
         }, // required
     }).addEvent("message", (msg) => {
         //if ((msg.client.config.adminId.includes(msg.author.id) || msg.client.config.ownerId == msg.author.id || msg.author.id == "150065841776492544") && msg.guild.id == "639630243111501834") {
-        if (msg.content.toLowerCase().indexOf("invite") > 0 && msg.content.toLowerCase().indexOf("you to") > 0 && msg.content.toLowerCase().indexOf(nicksOffice) > 0) {
+        if (msg.content.toLowerCase().indexOf("invite") > 0 && msg.content.toLowerCase().indexOf("you to") > 0 && msg.content.toLowerCase().indexOf(nicksOffice(msg)) > 0) {
             nicksOffice(msg);
             msg.channel.send("https://media1.tenor.com/images/eb75921cb2fc88489cbc58c7e3de3883/tenor.gif?itemid=18401680");
         }
@@ -363,5 +363,29 @@ Module
             nicksOfficeRestore(msg);
             u.log(msg);
         }, // required
+    }).addEvent("message", (msg) => {
+        if (msg.author.bot) { return }
+        var ran = Math.random();
+        var oddsThatNothingHappens = 0.9;
+        if (ran < oddsThatNothingHappens && !(msg.author.id == "548618555676033039")) { return }
+        let im;
+        let content = ` `+ msg.content.toLowerCase();
+        content = content.replace(" i am ", " im ").replace(" i'm ", " im ")
+        if (content.indexOf(" im ") > -1) {
+            im = content.indexOf(" im ");
+            subStrLeng = content.length - im;
+            if (subStrLeng > 30) subStrLeng = 30;
+            let dadJokeName = content.substr(im + 3, subStrLeng);
+            dadJokeName = dadJokeName.charAt(1).toUpperCase() + dadJokeName.substr(2, dadJokeName.length);
+            if(msg.author.id == "548618555676033039") {
+                dadJokeName = `▲${dadJokeName}▲`;
+            }
+            try {
+                u.log("got here");
+                msg.member.setNickname(dadJokeName, "For the memes");
+            } catch (error) {
+                u.log(error);
+            }
+        }
     });
 module.exports = Module;

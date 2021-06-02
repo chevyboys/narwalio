@@ -15,19 +15,16 @@ const Module = new Augur.Module()
         let availableRoles = [].concat(...(inventory.filter((v, k) => member.roles.cache.has(k)).array()));
         let role = msg.guild.roles.cache.find(r => r.name.toLowerCase() == suffix.toLowerCase().replace(" colors", "").replace(" seasonal", ""));
         
-      if (!role) {
+        let toAdd = msg.guild.roles.cache.find(r => r.name.toLowerCase() == `${suffix.toLowerCase().replace(" colors", "")} colors`);
+      if (!toAdd) {
         u.clean(msg);
         msg.reply("sorry, that's not a role on the server. Check `!inventory` to see what you can equip.").then(u.clean);
-      } else if (!member.roles.cache.has(role.id)) {
+      } else if (availableRoles.indexOf(toAdd.id) < 0) {
         u.clean(msg);
-        msg.reply("sorry, you don't have that role. Check `!inventory` to see what you can equip.").then(u.clean);
-      } else if (!availableRoles.join("").indexOf(role.id)) {
-        u.clean(msg);
-        msg.reply("sorry, that role isn't equippable. Check `!inventory` to see what you can equip.").then(u.clean);
+        msg.reply("sorry, that role isn't equippable in your inventory. Check `!inventory` to see what you can equip.").then(u.clean);
       } else {
         // The role exists, the member has it, and it's equippable
-        let toAdd = msg.guild.roles.cache.find(r => r.name.toLowerCase() == `${suffix.toLowerCase().replace(" colors", "")} colors`);
-        await member.roles.remove(Array.from(availableRoles.values()));
+        await member.roles.remove(availableRoles);
         await member.roles.add(toAdd);
         msg.react("👌");
       }

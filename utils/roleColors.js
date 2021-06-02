@@ -1,5 +1,117 @@
 const {Collection} = require("discord.js");
 
+const Cass = {
+  Staff: {
+    Author: {
+      base: "819035057679368232",
+      colors: "830197401683623966",
+    },
+    DiscordHead: {
+      base: "819034701209141298",
+      colors: "830197320191705128",
+    },
+    Admin: {
+      base: "819031079298138187",
+      colors: "830197226444947456",
+    },
+    Moderator: {
+      base: "819035372390449193",
+      colors: "830197032207253581",
+    },
+    Team: {
+      base: "849748022786129961",
+      colors: "849748196742004836",
+    },
+    CasstMember: {
+      base: "819037285231755265",
+      colors: "830195058694160384",
+    },
+  },
+  Patreon: {
+    MrGenieClub: {
+      base: "819036592173219841",
+      colors: "830195229231153173",
+    },
+    ThornroseClub: {
+      base: "819036460929384489",
+      colors: "830195590171983883",
+    },
+    FifionahClub: {
+      base: "819035956254474240",
+      colors: "830195427411492894",
+    },
+    ServerBooster: {
+      base: "833852680581152828",
+      colors: "833853524101955595",
+    },
+    FeaturedFanArtist: {
+      base: "839869129682059316",
+      colors: "839869290504126476",
+    },
+    FanArtist: {
+      base: "839876210803867658",
+      colors: "839876367599534091",
+    },
+  },
+  LevelRewards:{
+    Serf:{
+      base: "821550399068438589",
+      colors: "830186517561081877",
+      seasonalColors: "840400688877404190",
+    },
+    Commoner:{
+      base: "821550724331995147",
+      colors: "830186630874660864",
+      seasonalColors: "840400689514676234",
+    },
+    Apprentice:{
+      base: "821552048121446421",
+      colors: "830186949192319006",
+      seasonalColors: "840400690537955348",
+    },
+    Journeyman:{
+      base: "821552774638206986",
+      colors: "830187184551362611",
+      seasonalColors: "840400691168149506",
+    },
+    Tradesman:{
+      base: "821552923082227712",
+      colors: "830187302772801626",
+      seasonalColors: "840400691860209675",
+    },
+    Noble:{
+      base: "821557037539917865",
+      colors: "830187385739280445",
+      seasonalColors: "840400693058863184",
+    },
+    Baron:{
+      base: "821553387878613012",
+      colors: "830187463565508693",
+      seasonalColors: "840400693771894825",
+    },
+    Viscount:{
+      base: "821553717777530920",
+      colors: "830187534452785182",
+      seasonalColors: "840400695311204362",
+    },
+    Earl:{
+      base: "821554000208855050",
+      colors: "830187629509083156",
+      seasonalColors: "840400696423088138",
+    },
+    Duke:{
+      base: "821554647600332850",
+      colors: "830187703248093255",
+      seasonalColors: "840400697291571270",
+    },
+    Prince:{
+      base: "821554790697664533",
+      colors: "830187798928556123",
+      seasonalColors: "840400697912852520",
+    },
+
+  }
+}
 const inventory = new Collection([//base / color / seasonal
   ["828822226333073468", ["802367780942643251"]], // Founder
   ["686804730453819404",  ["828812391131119656"]], // Admin
@@ -19,28 +131,32 @@ const inventory = new Collection([//base / color / seasonal
   ["821568249073500161",["828829683750666281","828841748532035634"]],//Serf Colors
   //Cass Kingdom
     //Staff
-    ["819035057679368232", ["830197401683623966"]],   // Author
-    ["819034701209141298", ["830197320191705128"]],   // Discord Head
-    ["819031079298138187", ["830197226444947456"]],   // Admin
-    ["819035372390449193", ["830197032207253581"]],   // Moderator
-    ["819037285231755265", ["830195058694160384"]],   // Casst Member
-    //Patreon
-    ["819036592173219841", ["830195229231153173", "830195590171983883", "830195427411492894"]],   // Mr. Genie Club!
-    ["819036460929384489", ["830195590171983883", "830195427411492894"]],   // Thornrose Club!
-    ["819035956254474240", ["830195427411492894"]],   // Fifionah Club!
-    ["833852680581152828", ["833853524101955595"]],   //Server Booster
+    [Cass.Staff.Author.base, [Cass.Staff.Author.colors]],
+    [Cass.Staff.DiscordHead.base, [Cass.Staff.DiscordHead.colors]],
+    [Cass.Staff.Admin.base, [Cass.Staff.Admin.colors]],
+    [Cass.Staff.Moderator.base, [Cass.Staff.Moderator.colors]],
+    [Cass.Staff.Team.base, [Cass.Staff.Team.colors]],
+    [Cass.Staff.CasstMember.base, [Cass.Staff.CasstMember.colors]],
+
+    //Patreon / rewards
+    [Cass.Patreon.MrGenieClub.base, [Cass.Patreon.FifionahClub.colors, Cass.Patreon.ThornroseClub.colors, Cass.Patreon.MrGenieClub.colors]],   // Mr. Genie Club!
+    [Cass.Patreon.ThornroseClub.base, [Cass.Patreon.FifionahClub.colors, Cass.Patreon.ThornroseClub.colors]],   // Thornrose Club!
+    [Cass.Patreon.FifionahClub.base, [Cass.Patreon.FifionahClub.colors]],  // Fifionah Club!
+    [Cass.Patreon.ServerBooster.base, [Cass.Patreon.ServerBooster.colors]],   //Server Booster
+    [Cass.Patreon.FeaturedFanArtist.base, [Cass.Patreon.FeaturedFanArtist.colors]],  //Featured Fan Artist
+    [Cass.Patreon.FanArtist.base, [Cass.Patreon.FanArtist.colors]],  //fan artist
     //Level Up
-  ["821550399068438589", ["830186517561081877"]],   // serf
-  ["821550724331995147", ["830186630874660864", "830186517561081877"]],  // commoner
-  ["821552048121446421", ["830186949192319006", "830186630874660864", "830186517561081877"]],   // apprentice
-  ["821552774638206986", ["830187184551362611", "830186949192319006", "830186630874660864", "830186517561081877"]],   // journeyman
-  ["821552923082227712", ["830187302772801626", "830187184551362611", "830186949192319006", "830186630874660864", "830186517561081877"]],   // tradesman
-  ["821557037539917865", ["830187385739280445", "830187302772801626", "830187184551362611", "830186949192319006", "830186630874660864", "830186517561081877"]],   // noble
-  ["821553387878613012", ["830187463565508693", "830187385739280445", "830187302772801626", "830187184551362611", "830186949192319006", "830186630874660864", "830186517561081877"]],   // baron
-  ["821553717777530920", ["830187534452785182", "830187463565508693", "830187385739280445", "830187302772801626", "830187184551362611", "830186949192319006", "830186630874660864", "830186517561081877"]],   // viscount
-  ["821554000208855050", ["830187629509083156", "830187534452785182", "830187463565508693", "830187385739280445", "830187302772801626", "830187184551362611", "830186949192319006", "830186630874660864", "830186517561081877"]],   // earl
-  ["821554647600332850", ["830187703248093255", "830187629509083156", "830187534452785182", "830187463565508693", "830187385739280445", "830187302772801626", "830187184551362611", "830186949192319006", "830186630874660864", "830186517561081877"]],   // duke
-  ["821554790697664533", ["830187798928556123", "830187703248093255", "830187629509083156", "830187534452785182", "830187463565508693", "830187385739280445", "830187302772801626", "830187184551362611", "830186949192319006", "830186630874660864", "830186517561081877"]],   // prince
+   [Cass.LevelRewards.Serf.base, [Cass.LevelRewards.Serf.colors, Cass.LevelRewards.Serf.seasonalColors]],
+   [Cass.LevelRewards.Commoner.base, [Cass.LevelRewards.Serf.colors, Cass.LevelRewards.Commoner.colors, Cass.LevelRewards.Serf.seasonalColors, Cass.LevelRewards.Commoner.seasonalColors]],
+   [Cass.LevelRewards.Apprentice.base, [Cass.LevelRewards.Serf.colors, Cass.LevelRewards.Commoner.colors, Cass.LevelRewards.Apprentice.colors, Cass.LevelRewards.Serf.seasonalColors, Cass.LevelRewards.Commoner.seasonalColors, Cass.LevelRewards.Apprentice.seasonalColors]],
+   [Cass.LevelRewards.Journeyman.base, [Cass.LevelRewards.Serf.colors, Cass.LevelRewards.Commoner.colors, Cass.LevelRewards.Apprentice.colors,  Cass.LevelRewards.Journeyman.colors,Cass.LevelRewards.Serf.seasonalColors, Cass.LevelRewards.Commoner.seasonalColors, Cass.LevelRewards.Apprentice.seasonalColors, Cass.LevelRewards.Journeyman.seasonalColors]],
+   [Cass.LevelRewards.Tradesman.base, [Cass.LevelRewards.Serf.colors, Cass.LevelRewards.Commoner.colors, Cass.LevelRewards.Apprentice.colors,  Cass.LevelRewards.Journeyman.colors, Cass.LevelRewards.Tradesman.colors, Cass.LevelRewards.Serf.seasonalColors, Cass.LevelRewards.Commoner.seasonalColors, Cass.LevelRewards.Apprentice.seasonalColors, Cass.LevelRewards.Journeyman.seasonalColors, Cass.LevelRewards.Tradesman.seasonalColors]],
+   [Cass.LevelRewards.Noble.base, [Cass.LevelRewards.Serf.colors, Cass.LevelRewards.Commoner.colors, Cass.LevelRewards.Apprentice.colors,  Cass.LevelRewards.Journeyman.colors, Cass.LevelRewards.Tradesman.colors, Cass.LevelRewards.Noble.colors, Cass.LevelRewards.Serf.seasonalColors, Cass.LevelRewards.Commoner.seasonalColors, Cass.LevelRewards.Apprentice.seasonalColors, Cass.LevelRewards.Journeyman.seasonalColors, Cass.LevelRewards.Tradesman.seasonalColors, Cass.LevelRewards.Noble.seasonalColors,]], 
+   [Cass.LevelRewards.Baron.base, [Cass.LevelRewards.Serf.colors, Cass.LevelRewards.Commoner.colors, Cass.LevelRewards.Apprentice.colors,  Cass.LevelRewards.Journeyman.colors, Cass.LevelRewards.Tradesman.colors, Cass.LevelRewards.Noble.colors,  Cass.LevelRewards.Baron.colors, Cass.LevelRewards.Serf.seasonalColors, Cass.LevelRewards.Commoner.seasonalColors, Cass.LevelRewards.Apprentice.seasonalColors, Cass.LevelRewards.Journeyman.seasonalColors, Cass.LevelRewards.Tradesman.seasonalColors, Cass.LevelRewards.Noble.seasonalColors, Cass.LevelRewards.Baron.seasonalColors]],
+   [Cass.LevelRewards.Viscount.base,  [Cass.LevelRewards.Serf.colors, Cass.LevelRewards.Commoner.colors, Cass.LevelRewards.Apprentice.colors,  Cass.LevelRewards.Journeyman.colors, Cass.LevelRewards.Tradesman.colors, Cass.LevelRewards.Noble.colors,  Cass.LevelRewards.Baron.colors,  Cass.LevelRewards.Viscount.colors, Cass.LevelRewards.Serf.seasonalColors, Cass.LevelRewards.Commoner.seasonalColors, Cass.LevelRewards.Apprentice.seasonalColors, Cass.LevelRewards.Journeyman.seasonalColors, Cass.LevelRewards.Tradesman.seasonalColors, Cass.LevelRewards.Noble.seasonalColors, Cass.LevelRewards.Baron.seasonalColors,  Cass.LevelRewards.Viscount.seasonalColors]],
+   [Cass.LevelRewards.Earl.base, [Cass.LevelRewards.Serf.colors, Cass.LevelRewards.Commoner.colors, Cass.LevelRewards.Apprentice.colors,  Cass.LevelRewards.Journeyman.colors, Cass.LevelRewards.Tradesman.colors, Cass.LevelRewards.Noble.colors,  Cass.LevelRewards.Baron.colors,  Cass.LevelRewards.Viscount.colors, Cass.LevelRewards.Earl.colors, Cass.LevelRewards.Serf.seasonalColors, Cass.LevelRewards.Commoner.seasonalColors, Cass.LevelRewards.Apprentice.seasonalColors, Cass.LevelRewards.Journeyman.seasonalColors, Cass.LevelRewards.Tradesman.seasonalColors, Cass.LevelRewards.Noble.seasonalColors, Cass.LevelRewards.Baron.seasonalColors,  Cass.LevelRewards.Viscount.seasonalColors,  Cass.LevelRewards.Earl.seasonalColors]],
+   [Cass.LevelRewards.Duke.base, [Cass.LevelRewards.Serf.colors, Cass.LevelRewards.Commoner.colors, Cass.LevelRewards.Apprentice.colors,  Cass.LevelRewards.Journeyman.colors, Cass.LevelRewards.Tradesman.colors, Cass.LevelRewards.Noble.colors,  Cass.LevelRewards.Baron.colors,  Cass.LevelRewards.Viscount.colors, Cass.LevelRewards.Earl.colors, Cass.LevelRewards.Duke.colors, Cass.LevelRewards.Serf.seasonalColors, Cass.LevelRewards.Commoner.seasonalColors, Cass.LevelRewards.Apprentice.seasonalColors, Cass.LevelRewards.Journeyman.seasonalColors, Cass.LevelRewards.Tradesman.seasonalColors, Cass.LevelRewards.Noble.seasonalColors, Cass.LevelRewards.Baron.seasonalColors,  Cass.LevelRewards.Viscount.seasonalColors,  Cass.LevelRewards.Earl.seasonalColors, Cass.LevelRewards.Duke.seasonalColors]],
+   [Cass.LevelRewards.Prince.base, [Cass.LevelRewards.Serf.colors, Cass.LevelRewards.Commoner.colors, Cass.LevelRewards.Apprentice.colors,  Cass.LevelRewards.Journeyman.colors, Cass.LevelRewards.Tradesman.colors, Cass.LevelRewards.Noble.colors,  Cass.LevelRewards.Baron.colors,  Cass.LevelRewards.Viscount.colors, Cass.LevelRewards.Earl.colors, Cass.LevelRewards.Duke.colors, Cass.LevelRewards.Prince.colors, Cass.LevelRewards.Serf.seasonalColors, Cass.LevelRewards.Commoner.seasonalColors, Cass.LevelRewards.Apprentice.seasonalColors, Cass.LevelRewards.Journeyman.seasonalColors, Cass.LevelRewards.Tradesman.seasonalColors, Cass.LevelRewards.Noble.seasonalColors, Cass.LevelRewards.Baron.seasonalColors,  Cass.LevelRewards.Viscount.seasonalColors,  Cass.LevelRewards.Earl.seasonalColors, Cass.LevelRewards.Duke.seasonalColors, Cass.LevelRewards.Prince.seasonalColors]],
 ]);
 
 module.exports = inventory;
