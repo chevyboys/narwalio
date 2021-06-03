@@ -100,10 +100,10 @@ Module
             u.log(msg);
         } // required
     }).addCommand({
-        name: "deven", // required
-        aliases: ["medusa", "petrify", "freeze"], // optional
+        name: "petrify", // required
+        aliases: ["medusa", "freeze"], // optional
         syntax: "", // optional
-        description: "Deven's personal command. Petrifies people.", // recommended
+        description: "A personal command. Petrifies people.", // recommended
         info: "", // recommended
         hidden: true, // optional   
         category: "Fun", // optional
@@ -168,38 +168,10 @@ Module
             } // required
         },
     }).addCommand({
-        name: "jens", // required
-        aliases: ["jensno", "talk", "stopLying"], // optional
+        name: "<@487085787326840843>", // required
+        aliases: ["noNotAgain", "dmno"], // optional
         syntax: "", // optional
-        description: "Jens's personal command", // recommended
-        info: "", // recommended
-        hidden: true, // optional
-        category: "Fun", // optional
-        enabled: true, // optional
-        permissions: (msg) => true, // optional
-        process: (msg) => {
-            function randomNumber(min, max) {
-                let high = Math.max(max, min);
-                let low = Math.min(max, min);
-                return Math.floor(Math.random() * (high - low + 1)) + low;
-            }
-            //Roll a D20. on a 20 get a squirell. On a 1, elmo burns. anything else you get heinz
-            function hollyMessage(override) {
-                switch (override || randomNumber(1, 20)) {
-                    case 1: return `It's not his fault, #blameLizzie`;
-                    case 20: return `||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||pop||||enjoy your bubble wrap||`;
-                    default: return `https://media.tenor.com/images/eb1c2bd9933c242b4dbc537ff6ab6f0c/tenor.gif`;
-                }
-            }
-            let holyMessage = hollyMessage();
-            msg.channel.send(holyMessage);
-            u.log(msg);
-        } // required
-    }).addCommand({
-        name: "nick", // required
-        aliases: ["nickno", "dmno"], // optional
-        syntax: "", // optional
-        description: "Nick, No", // recommended
+        description: "please, No", // recommended
         info: "", // recommended
         hidden: true, // optional
         category: "Fun", // optional
@@ -217,7 +189,7 @@ Module
             function hollyMessage(override) {
                 switch (override || randomNumber(1, 20)) {
                     case 1: return `It's not his fault, #blameLizzie`;
-                    case 20: return `**NICK YES!**`;
+                    case 20: return `**<@487085787326840843> YES!**`;
                     default: return `https://media.discordapp.net/attachments/663558345130770442/767422186960584774/Not_Another_Ben.jpg?width=622&height=593`;
                 }
             }

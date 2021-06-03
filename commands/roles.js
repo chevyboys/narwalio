@@ -11,9 +11,14 @@ const Module = new Augur.Module()
   process: async (msg, suffix) => {
     try {
         //get the role they want equiped
-        let member = await msg.guild.members.fetch(msg.author.id);
+        let member;
+        if(msg.mentions.users.size && (msg.member.roles.cache.some(r => r.name.toLowerCase() === "admin") || msg.member.roles.cache.some(r => r.name.toLowerCase() === "moderator")))  {
+           member = await msg.guild.members.fetch(msg.mentions.users.first().id);
+           suffix = suffix.replace(/<+.*>\s*/gm, "");
+        }
+        else member = await msg.guild.members.fetch(msg.author.id);
         let availableRoles = [].concat(...(inventory.filter((v, k) => member.roles.cache.has(k)).array()));
-        let role = msg.guild.roles.cache.find(r => r.name.toLowerCase() == suffix.toLowerCase().replace(" colors", "").replace(" seasonal", ""));
+        let role = msg.guild.roles.cache.find(r => r.name.toLowerCase() == suffix.toLowerCase().replace(" colors", "").replace(" seasonal", "").trim());
         
         let toAdd = msg.guild.roles.cache.find(r => r.name.toLowerCase() == `${suffix.toLowerCase().replace(" colors", "")} colors`);
       if (!toAdd) {
@@ -49,7 +54,11 @@ const Module = new Augur.Module()
   permissions: (msg) => true,
   process: async (msg) => {
     try {
-      let member = msg.member;
+      let member;
+        if(msg.mentions.users.size > -1)  {
+           member = await msg.guild.members.fetch(msg.mentions.users.last().id);
+        }
+        else member = await msg.guild.members.fetch(msg.author.id); 
       let availableRoles = [].concat(...(inventory.filter((v, k) => member.roles.cache.has(k)).array()));
       let embed = u.embed().setAuthor(member.displayName, member.user.displayAvatarURL({size: 32}))
         .setTitle("Equippable Color Inventory")

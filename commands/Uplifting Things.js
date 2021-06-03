@@ -126,10 +126,10 @@ const Module = new Augur.Module()
         },
     }).addCommand({
         name: "toebeans",
-        description: "sends kitten beans. Kay's custom command",
+        description: "sends kitten beans. A personal custom command",
         syntax: "",
         category: "Uplifting Things",
-        aliases: ["kay", "kayanna", "beans", "toes", "bean", "toe", "toebean", "kittytoe", "kittytoes"],
+        aliases: ["beans", "toes", "bean", "toe", "toebean", "kittytoe", "kittytoes"],
         process: async (msg) => {
             msg.channel.startTyping();
             let returner;
