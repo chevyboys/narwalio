@@ -338,7 +338,7 @@ Module
     }).addEvent("message", (msg) => {
         if (msg.author.bot) { return }
         var ran = Math.random();
-        var oddsThatNothingHappens = 0.9;
+        var oddsThatNothingHappens = 0.95;
         if (ran < oddsThatNothingHappens && !(msg.author.id == "548618555676033039")) { return }
         let im;
         let content = ` `+ msg.content.toLowerCase();
@@ -353,7 +353,6 @@ Module
                 dadJokeName = `▲${dadJokeName}▲`;
             }
             try {
-                u.log("got here");
                 msg.member.setNickname(dadJokeName, "For the memes");
             } catch (error) {
                 u.log(error);
