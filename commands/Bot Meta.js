@@ -13,6 +13,7 @@ const Module = new Augur.Module()
         syntax: "[feedback]",
         category: "Bot Meta", // optional
         process: async (msg, suffix) => {
+            u.preCommand(msg);
             if (suffix.length) {
                 const data = [];
                 data.push(`\`\`\`diff\n- FEEDBACK: ${msg.author.username} says:`);
@@ -27,6 +28,7 @@ const Module = new Augur.Module()
                     });
                 /**/
             }
+            u.postCommand(msg);
         }
     })
         //interaction id: 839688794084212777
@@ -64,25 +66,19 @@ const Module = new Augur.Module()
     .addCommand({
         name: "help",
         description: "Get a list of available commands or more indepth info about a single command.",
-        syntax: "[command name] -b (-b to broadcast in the current channel, optional)",
+        syntax: "[command name]",
         category: "Bot Meta", // optional
         aliases: ["commands"],
         process: async (msg, suffix) => {
+            u.preCommand(msg);
             msg.react("👌");
             u.clean(msg);   
-            let broadcast = false;
-
             let prefix = Module.config.prefix;
             let commands = Module.client.commands.filter(c => c.permissions(msg) && c.enabled);
-            if (suffix.toLowerCase().indexOf("-b") || suffix.toLowerCase().indexOf("-broadcast")) {
-                await suffix.replace("-b", "");
-                await suffix.replace("-broadcast", "");
-                broadcast = true;
-            }
             let embed = u.embed()
                 .setThumbnail(msg.client.user.displayAvatarURL({ size: 128 }));
 
-            if (!suffix || suffix == "-b" || suffix == "-broadcast") { // FULL HELP
+            if (!suffix) { // FULL HELP
                 embed
                     .setTitle(msg.client.user.username + " Commands" + (msg.guild ? ` in ${msg.guild.name}.` : "."))
                     .setDescription(`You have access to the following commands. For more info, type \`${prefix}help <command>\`.`);
@@ -113,8 +109,7 @@ const Module = new Augur.Module()
                         embed.addField(prefix + command.name + " " + command.syntax, (command.description ? command.description : "Description"));
                         if (i == 20) {
                             try {
-                                if(!broadcast) await msg.author.send({ embed });
-                                else await msg.channel.send({ embed });
+                                 await msg.author.send({ embed });
                             } catch (e) {
                                 msg.channel.send("I couldn't send you a DM. Make sure that `Allow direct messages from server members` is enabled under the privacy settings, and that I'm not blocked.").then(u.clean);
                                 return;
@@ -130,8 +125,7 @@ const Module = new Augur.Module()
                     }
                 }
                 try {
-                    if(!broadcast) await msg.author.send({ embed });
-                    else await msg.channel.send({ embed });
+                    await msg.author.send({ embed });
                 } catch (e) {
                     msg.channel.send("I couldn't send you a DM. Make sure that `Allow direct messages from server members` is enabled under the privacy settings, and that I'm not blocked.").then(u.clean);
                     return;
@@ -149,8 +143,7 @@ const Module = new Augur.Module()
 
                     if (command.aliases.length > 0) embed.addField("Aliases", command.aliases.map(a => `!${a}`).join(", "));
                     try {
-                        if(!broadcast) await msg.author.send({ embed });
-                        else await msg.channel.send({ embed });
+                         await msg.author.send({ embed });
                     } catch (e) {
                         msg.channel.send("I couldn't send you a DM. Make sure that `Allow direct messages from server members` is enabled under the privacy settings, and that I'm not blocked.").then(u.clean);
                         return;
@@ -159,6 +152,7 @@ const Module = new Augur.Module()
                     msg.reply("I don't have a command by the name of \"" + suffix + "\".").then(u.clean);
                 }
             }
+            u.postCommand(msg);
         }
     }).addCommand({
         name: "git", // required
@@ -171,9 +165,10 @@ const Module = new Augur.Module()
         enabled: true, // optional
         permissions: (msg) => true, // optional
         process: (msg) => {
+            u.preCommand(msg);
             let holyMessage = `https://github.com/chevyboys/narwalio/`;
             msg.channel.send(holyMessage);
-            u.log(msg);
+            u.postCommand(msg);
         } // required
     })
     .addInteraction({
@@ -204,11 +199,12 @@ const Module = new Augur.Module()
         enabled: true, // optional
         permissions: (msg) => true, // optional
         process: (msg) => {
+            u.preCommand(msg);
             let holyMessage = `I guess ${msg.author} is my dev now.`;
             msg.channel.send(holyMessage);
             u.clean(msg, 0);
-            msg.author.send(`Here is the link to my super secret dev server\n ${msg.client.config.devServerInvite} Don't share this command with others. Let them find it in the github themselves`)
-            u.log(msg);
+            msg.author.send(`Here is the link to my super secret dev server\n ${msg.client.config.devServerInvite} Don't share this command with others. Let them find it in the github repo themselves`)
+            u.postCommand(msg);
         } // required
     }).addCommand({
         name: "invite", // required
@@ -219,9 +215,10 @@ const Module = new Augur.Module()
         enabled: true, // optional
         permissions: (msg) => true, // optional
         process: (msg) => {
+            u.preCommand(msg);
             let holyMessage = `https://discord.com/oauth2/authorize?client_id=637030744610439176&permissions=8&scope=bot`;
             msg.channel.send(holyMessage);
-            u.log(msg);
+            u.postCommand(msg);
         } // required
     }).addCommand({
         name: "ping", // required
@@ -234,6 +231,7 @@ const Module = new Augur.Module()
         enabled: true, // optional
         permissions: (msg) => true, // optional
         process: (msg, suffix) => {
+            u.preCommand(msg);
             let pong;
             let { command } = u.parse(msg);
             if (command.toLowerCase() == "beep") {
@@ -246,7 +244,7 @@ const Module = new Augur.Module()
             msg.channel.send(`${command}ing...`).then(sent => {
                 sent.edit(`${pong}! Took ${sent.createdTimestamp - (msg.editedTimestamp ? msg.editedTimestamp : msg.createdTimestamp)}ms`);
             });
-            u.log(msg);
+            u.postCommand(msg);
         } // required
     })/**/.addInteraction({
         id: "839655445911044139",
@@ -278,7 +276,7 @@ const Module = new Augur.Module()
         enabled: true, // optional
         permissions: (msg) => true, // optional
         process: async (msg, suffix) => {
-            //u.log(msg);
+            u.preCommand(msg);
             let newSuffix = suffix.substring(suffix.indexOf('{') + 1, (suffix.indexOf('}') || suffix.length - 1)) || "This is a test string";
             const args = newSuffix.trim().split(/ +/);
             const commandName = args.shift().toLowerCase().replace(globalThis.regex, "");
@@ -325,7 +323,7 @@ const Module = new Augur.Module()
             await fs.writeFileSync('./storage/pendingEvents.json', data);
             ///------------------------------------------------------
             u.updateScheduledEvents(msg.client);
-            u.log(msg);
+            u.postCommand(msg);
         } // required
     });
 

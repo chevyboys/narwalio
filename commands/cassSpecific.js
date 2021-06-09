@@ -50,8 +50,9 @@ Module
         hidden: true, // optional
         permissions: (msg) => config.adminId.includes(msg.author.id) || config.ownerId == msg.author.id, // optional
         process: async (msg, suffix) => {
+            u.preCommand(msg)
                 msg.channel.send(makeRoles(msg, suffix).toString());
-            u.log(msg);
+            u.postCommand(msg);
         }, // required
     });
 module.exports = Module;

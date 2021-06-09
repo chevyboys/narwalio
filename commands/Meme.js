@@ -8,6 +8,7 @@ const Module = new Augur.Module()
         description: "Creates a meme, put an image URL for you background and then put the text you want along the bottom. Or put the image source afterwards. Who am I to judge?",
         permissions: (msg) => msg.channel.type === 'dm' || msg.channel.permissionsFor(msg.member).has(["ATTACH_FILES", "EMBED_LINKS"]),
         process: (msg, suffix = u.parse(msg).suffix) => {
+            u.preCommand(msg);
             //make the bot handle -t and a new line escape character the same way.
             suffix.replace("\n", "-t");
             //general globals from bot this was imported from
@@ -51,8 +52,9 @@ const Module = new Augur.Module()
             let meme = `https://api.memegen.link/images/custom/${topText || "_"}/${bottomText || "_"}.png?background=${src}`;
 
             msg.channel.send(`<@${msg.author.id}> says:`, { files: [meme] });
-            u.log(msg);
+            
             u.clean(msg, 2000);
+            u.postCommand(msg);
         },
     }).addCommand({
         name: "behold",
@@ -90,27 +92,6 @@ const Module = new Augur.Module()
                 client: msg.client,
             }
             u.run(fakeMsg, "meme", `Behold! ${suffix}`);
-        }
-    }).addCommand({
-        name: "flextape",
-        aliases: ["oof"],
-        description: "when someone gets hit hard, use this",
-        category: "Meme",
-        process: (msg) => {
-            let memes = [
-                'https://tenor.com/view/damage-thats-a-lot-of-damage-thats-a-lotta-damage-jon-tron-gif-13054451',
-                'https://tenor.com/view/smile-straight-face-gif-13022963',
-                'https://www.mypokecard.com/my/galery/EmZIbvDfRsZ4.jpg',
-            ];
-            memes.push(`https://newfastuff.com/wp-content/uploads/2019/06/LMN7dqu.png`);
-            memes.push(`https://newfastuff.com/wp-content/uploads/2019/05/tFzY27b.png`);
-            memes.push(`https://i.kym-cdn.com/photos/images/newsfeed/001/390/606/063.jpg`);
-            function randomNumber(min, max) {
-                return Math.round(Math.random() * (max - min) + min);
-            }
-            let num1 = randomNumber(0, memes.length - 1);
-            msg.channel.send(memes[num1]);
-            u.log(msg);
         }
     });
 module.exports = Module;

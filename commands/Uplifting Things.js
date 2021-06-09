@@ -42,7 +42,7 @@ async function postRandomCutie(urls, msg, timeout) {
     do {
         randomURL = urls[Math.floor(Math.random() * urls.length) + 1];
         if (randomURL && randomURL.title.indexOf("date") > -1) {
-            console.log(`randomURL.title ${randomURL.title} was blocked`.red);
+            u.log(`randomURL.title ${randomURL.title} was blocked`.red);
             randomURL = urls[Math.floor(Math.random() * urls.length) + 1];
         }
         if (randomURL.title.length > 255) randomURL.title = randomURL.title.substring(0, 255);
@@ -75,11 +75,11 @@ const Module = new Augur.Module()
         syntax: "",
         aliases: ["awww", "awwww", "awwwww", "adorable"],
         process: async (msg, suffix) => {
-            msg.channel.startTyping();
+            u.preCommand(msg);
             let returner;
             returner = loadCuties(msg, suffix);
             u.log(msg);
-            msg.channel.stopTyping();
+            u.postCommand(msg);
             return returner;
         },
     }).addCommand({
@@ -89,12 +89,11 @@ const Module = new Augur.Module()
         category: "Uplifting Things",
         aliases: ["giggles", "puns", "cheerup", "grins"],
         process: async (msg) => {
+            u.preCommand(msg);
             suffix = 'smile'
             let returner;
-            msg.channel.startTyping()
             returner = await loadCuties(msg, suffix)
-            await msg.channel.stopTyping();
-            u.log(msg);
+            u.postCommand(msg);
             return returner;
         },
     }).addCommand({
@@ -104,8 +103,8 @@ const Module = new Augur.Module()
         category: "Uplifting Things",
         aliases: ["kitty", "kitten", "pupper", "puppy", "smols", "smol"],
         process: async (msg) => {
+            u.preCommand(msg);
             suffix = 'smile'
-            msg.channel.startTyping();
             let returner;
             let subreddit;
             let random = Math.floor(Math.random() * 3);
@@ -121,8 +120,7 @@ const Module = new Augur.Module()
                     break;
             }
             returner = loadCuties(msg, suffix, subreddit);
-            u.log(msg);
-            msg.channel.stopTyping();
+            u.postCommand(msg);
             return returner;
         },
     }).addCommand({
@@ -132,12 +130,11 @@ const Module = new Augur.Module()
         category: "Uplifting Things",
         aliases: ["beans", "toes", "bean", "toe", "toebean", "kittytoe", "kittytoes"],
         process: async (msg) => {
-            msg.channel.startTyping();
+            u.preCommand(msg);
             let returner;
             let subreddit = "toebeans";
-            u.log(msg);
             returner = loadCuties(msg, suffix, subreddit, 20);
-            msg.channel.stopTyping();
+            u.postCommand(msg);
             return returner;
         }
     }).addEvent("presenceUpdate", async (oldPresence, newPresence) => {

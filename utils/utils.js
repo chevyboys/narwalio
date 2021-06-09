@@ -7,6 +7,7 @@ const { AugurClient } = require("augurbot");
 const colors = require('colors');
 const cron = require('cron');
 const GlobalBlackList = require("../storage/GlobalBlacklist.json");
+let clientObj;
 
 const errorLog = new Discord.WebhookClient(config.devLogs.error.id, config.devLogs.error.token);
 let serverSettings = new Map();
@@ -134,12 +135,12 @@ const Utils = {
             else {
                 username = msg.author.username;
             }
-            commandName = msg.content.substr(0, msg.content.indexOf(" "));
-            logger = (`${hour}:${minute}:${second}: `) + username + " called " + commandName + " \n> " + msg.content + "\n" + Utils.getMessageLink(msg);
+            commandName = msg.cleanContent.substr(0, msg.content.indexOf(" "));
+            logger = (`${hour}:${minute}:${second}: `) + username + " called " + commandName + " \n> " + msg.cleanContent + "\n" + Utils.getMessageLink(msg);
             if (msg && msg.client && msg.client.config && msg.client.config.token && msg.client.config.devLogs && msg.client.config.devLogs.token) {
                 logger = logger.replace(msg.client.config.token, 'TOKEN-THAT-WAS-NEARLY-LEAKED').replace(msg.client.config.devLogs.token, 'WEBHOOK-TOKEN');
             }
-            msg.client.channels.cache.get(config.devLogs.logChannel.id).send(logger);
+            clientObj = msg.client;
         }
         else {
             logger = (`${hour}:${minute}:${second}: `) + msg;
@@ -149,6 +150,7 @@ const Utils = {
         }
         if (color) console.log(logger.color);
         else console.log(logger);
+        if(clientObj) clientObj.channels.cache.get(config.devLogs.logChannel.id).send(logger);
         // eslint-disable-next-line no-undef
 
     },
@@ -161,7 +163,6 @@ const Utils = {
             let trimmed = content.substr(prefix.length).trim();
             let [command, ...params] = content.substr(prefix.length).split(" ");
             if (command) {
-                u.log(msg);
                 return {
                     command: command.toLowerCase(),
                     suffix: params.join(" "),
@@ -170,6 +171,15 @@ const Utils = {
             }
         }
         return null;
+    },
+    postCommand: async (msg, disableLog = false) => {
+        if (msg.author.bot) return;
+        await msg.channel.stopTyping();
+        if(!disableLog) u.log(msg);
+    },
+    preCommand: (msg) => {
+        if (msg.author.bot) return;
+        msg.channel.startTyping();
     },
     properCase: (txt) => txt.split(" ").map(word => (word[0].toUpperCase() + word.substr(1).toLowerCase())).join(" "),
     //sets the avatar of the bot

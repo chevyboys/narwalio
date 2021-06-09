@@ -9,6 +9,7 @@ const Module = new Augur.Module()
   description: "Equip a color from your inventory.",
   category: "Members",
   process: async (msg, suffix) => {
+    u.preCommand(msg);
     try {
         //get the role they want equiped
         let member;
@@ -34,17 +35,20 @@ const Module = new Augur.Module()
         msg.react("👌");
       }
     } catch(e) { u.errorHandler(e, msg); }
+    u.postCommand(msg);
   }
 })
 .addCommand({name: "unequip",
   description: "Unequip all colors from your inventory.",
   category: "Members",
   process: async (msg) => {
+    u.preCommand(msg);
     try {
       let member = await msg.guild.members.fetch(msg.author.id);
       await member.roles.remove(Array.from(inventory.values()));
       msg.react("👌");
     } catch(error) { u.errorHandler(error, msg); }
+    u.postCommand(msg);
   }
 })
 .addCommand({name: "inventory",
@@ -53,6 +57,7 @@ const Module = new Augur.Module()
   aliases: ["flex", "inv"],
   permissions: (msg) => true,
   process: async (msg) => {
+    u.preCommand(msg);
     try {
       let member;
         if(msg.mentions.users.size > 0)  {
@@ -70,27 +75,7 @@ const Module = new Augur.Module()
         msg.channel.send({embed, disableMentions: "all"});
       }
     } catch(error) { u.errorHandler(error, msg); }
-  }
-})
-.addCommand({name: "remove",
-  description: "Remove an opt-in role",
-  syntax: Object.keys(roles).join(" | "),
-  aliases: ["removechannel", "removerole"],
-  category: "Members",
-  process: async (msg, suffix) => {
-    try {
-      if (roles.has(suffix.toLowerCase())) {
-        let role = msg.guild.roles.cache.get(roles.get(suffix.toLowerCase()));
-
-        let member = await ldsg.members.fetch(msg.author);
-        if (member) await member.roles.remove(role);
-        msg.react("👌");
-        //modLogs.send(`ℹ️ **${member.displayName}** removed the ${role.name} role.`);
-      } else {
-        msg.reply("you didn't give me a valid role to remove.")
-        .then(u.clean);
-      }
-    } catch(error) { u.errorHandler(error, msg); }
+    u.postCommand(msg);
   }
 })
 .addCommand({name: "role",
@@ -99,6 +84,7 @@ const Module = new Augur.Module()
   aliases: ["hasrole"],
   category: "Members",
   process: (msg, suffix) => {
+    u.preCommand(msg);
     if (suffix) {
       let role = msg.guild.roles.cache.find(r => r.name.toLowerCase() == suffix.toLowerCase());
       if (role && role.members.size > 0) msg.channel.send(`Members with the ${role.name} role:\n\`\`\`\n${role.members.map(m => m.displayName).sort().join("\n")}\n\`\`\``, {split: {prepend: "```\n", append: "\n```"}});
@@ -107,6 +93,7 @@ const Module = new Augur.Module()
       msg.reply("you need to tell me a role to find!")
         .then(u.clean);
     }
+    u.postCommand(msg);
   },
   permissions: (msg) => msg.guild
 })
@@ -116,12 +103,14 @@ const Module = new Augur.Module()
   category: "Admin",
   hidden: true,
   process: (msg, suffix) => {
+    u.preCommand(msg);
     if (!suffix) msg.reply("you need to tell me a role name!").then(u.clean);
     else {
       let role = msg.guild.roles.cache.find(r => r.name.toLowerCase() == suffix.toLowerCase());
       if (!role) msg.reply(`I couldn't find a role named ${suffix}.`);
       else msg.channel.send(`${role.name}: ${role.id}`, {code: true});
     }
+    u.postCommand(msg);
   },
   permissions: (msg) => msg.guild
 })

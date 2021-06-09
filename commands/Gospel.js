@@ -198,6 +198,7 @@ const Module = new Augur.Module()
   alisases: ["comefollowme"],
   category: "Gospel",
   process: (msg, suffix) => {
+    u.preCommand(msg);
     try {
       let date = suffix ? new Date(suffix) : new Date();
       date.setHours(0, 0, 0, 0);
@@ -226,8 +227,11 @@ const Module = new Augur.Module()
         msg.channel.send(`Sorry, I don't have information for the ${date.getFullYear()} manual yet.`).then(u.clean);
       }
 
-    } catch(error) { u.errorHandler(error, msg); }
+    } catch(error) { u.errorHandler(error, msg); 
+    }
+    u.postCommand(msg);
   }
+  
 })
 /*.addCommand({name: "conference",
   description: "Searches for the best matching conference talk.",
@@ -260,20 +264,9 @@ const Module = new Augur.Module()
   aliases: ["sw", "v"],
   category: "Gospel",
   process: (msg, suffix) => {
+    u.preCommand(msg);
     if (!suffix || suffix == "random" || suffix == "rand" || suffix == "r")
       suffix = u.rand(highlights);
-
-    if (suffix.toLowerCase().startsWith("add ") && msg.guild && (msg.guild.id == Module.config.ldsg) && (msg.member.roles.cache.has(Module.config.roles.mod) || msg.member.roles.cache.has(Module.config.roles.management))) {
-      let verse = suffix.substr(4).trim();
-      if (addVerse(verse)) {
-        suffix = verse;
-        msg.react("👌");
-      } else {
-        msg.reply("I need a full reference with book, chapter, and verse.").then(u.clean);
-        return;
-      }
-    }
-
     let scripture = parseScripture(suffix);
     if (scripture) {
       scripture.book = scripture.book.replace(/ /g, "-").toLowerCase();
@@ -291,10 +284,12 @@ const Module = new Augur.Module()
         //} else msg.channel.send(`**${books[scripture.book].title} ${scripture.chapter}${(scripture.verse ? (":" + scripture.verse) : "")}**\n<${link}>`);
       } else msg.reply("sorry, I couldn't understand that reference.").then(u.clean);
     } else msg.reply("sorry, I couldn't understand that reference.").then(u.clean);
+    u.postCommand(msg);
   }
+ 
 })
 .addEvent("message", (msg) => {
-  if ((msg.channel.parentID == "363016072200454146") && !u.parse(msg) && !msg.author.bot) {
+  if ((msg.channel.parentID == "828706182402670592") && !u.parse(msg) && !msg.author.bot) {
     let match = null;
     while (match = searchExp.exec(msg.cleanContent))
       Module.client.commands.execute("verse", msg, match[0]);

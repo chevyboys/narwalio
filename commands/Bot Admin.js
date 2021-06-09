@@ -58,6 +58,7 @@ Module.addCommand({
     enabled: true, // optional
     permissions: (msg) => config.adminId.includes(msg.author.id) || config.ownerId == msg.author.id, // optional
     process: async (msg, suffix) => {
+        u.preCommand(msg);
         if (msg.content.indexOf("sudox") > -1) {
             eval(suffix);
         }
@@ -68,7 +69,7 @@ Module.addCommand({
             }
             sender();
         }
-        //u.log(msg);
+        u.postCommand(msg)
     } // required
 })
     .addCommand({
@@ -77,6 +78,7 @@ Module.addCommand({
         hidden: true,
         aliases: ["q", "restart"],
         process: async function (msg) {
+
             try {
                 await msg.react("🛏");
 
@@ -85,8 +87,9 @@ Module.addCommand({
                 for (let file of files) {
                     Module.client.moduleHandler.unload(path.resolve(process.cwd(), "./commands/", file));
                 }
-
+                await u.postCommand(msg, true);
                 if (msg.client.shard) {
+                   
                     msg.client.shard.broadcastEval("this.destroy().then(() => process.exit())");
                 } else {
                     await msg.client.destroy();
@@ -103,6 +106,7 @@ Module.addCommand({
         syntax: "[@target]\n[messge]",
         aliases: ["msg", "message"],
         process: (msg, suffix) => {
+            u.preCommand(msg);
             let messageToSend = suffix.split("\n")[1];
             for (const recepient in msg.mentions.users) {
                 if (recepient) {
@@ -139,6 +143,7 @@ Module.addCommand({
                 }
             }
             msg.react("👌");
+            u.postCommand(msg);
         },
         permissions: (msg) => (config.adminId.includes(msg.author.id) || config.ownerId == msg.author.id)
     })
@@ -150,9 +155,11 @@ Module.addCommand({
         syntax: "[game]",
         aliases: ["setgame", "game"],
         process: (msg, suffix) => {
+            u.preCommand(msg);
             if (suffix) msg.client.user.setActivity(suffix);
             else msg.client.user.setActivity("");
             msg.react("👌");
+            u.postCommand(msg);
         },
         permissions: (msg) => (config.adminId.includes(msg.author.id) || config.ownerId == msg.author.id || msg.channel.id == "708136881916870707")
     })
@@ -162,6 +169,7 @@ Module.addCommand({
         description: "Pull bot updates from git",
         hidden: true,
         process: (msg) => {
+            u.preCommand(msg);
             let spawn = require("child_process").spawn;
 
             u.clean(msg);
@@ -184,6 +192,7 @@ Module.addCommand({
                 else
                     msg.channel.send(`ERROR CODE ${code}:\n${stderr.join("\n")}`).then(u.clean);
             });
+            u.postCommand(msg);
         },
         permissions: (msg) => (Module.config.ownerId === (msg.author.id))
     })
@@ -194,6 +203,7 @@ Module.addCommand({
         description: "Check the bot's heartbeat",
         permissions: (msg) => (Module.config.ownerId === (msg.author.id)),
         process: async function (msg, suffix) {
+            u.preCommand(msg);
             try {
                 let client = msg.client;
 
@@ -225,6 +235,7 @@ Module.addCommand({
                     sendDiscordStatus(msg, embed, (suffix.indexOf('verbose') > -1));
                 }
             } catch (e) { u.errorHandler(e, msg); }
+            u.postCommand(msg);
         }
     })
     .addCommand({
@@ -235,7 +246,7 @@ Module.addCommand({
         description: "Reload command files.",
         info: "Use the command without a suffix to reload all command files.\n\nUse the command with the module name (including the `.js`) to reload a specific file.",
         process: (msg, suffix) => {
-            u.clean(msg);
+            u.preCommand(msg);
             let path = require("path");
             let files = (suffix ? suffix.split(" ") : fs.readdirSync(path.resolve(__dirname)).filter(file => file.endsWith(".js")));
 
@@ -245,6 +256,7 @@ Module.addCommand({
                 } catch (error) { msg.client.errorHandler(error, msg); }
             }
             msg.react("👌");
+            u.postCommand(msg);
         },
         permissions: (msg) => config.adminId.includes(msg.author.id) || config.ownerId == msg.author.id
     });

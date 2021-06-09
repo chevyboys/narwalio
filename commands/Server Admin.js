@@ -6,8 +6,10 @@ u = require("../utils/utils");
 const tags = new Map();
 
 function runTag(msg) {
+  
   let cmd = u.parse(msg);
   if (cmd && tags.get(msg.guild.id).has(cmd.command)) {
+    u.preCommand(msg);
     let tag = tags.get(msg.guild.id).get(cmd.command);
     let response = tag.response
       .replace(/<@author>/ig, msg.author)
@@ -36,6 +38,7 @@ function runTag(msg) {
         }
       );
     } else msg.channel.send(response);
+    u.postCommand(msg, true);
     return true;
   } else if (cmd && (cmd.command == "help") && (tags.get(msg.guild.id).size > 0) && !cmd.suffix) {
     let embed = u.embed()
@@ -49,6 +52,7 @@ function runTag(msg) {
     embed.setDescription(list.join("\n"));
     msg.author.send({embed}).catch(u.noop);
   }
+  
 }
 
 const Module = new Augur.Module().addCommand({
@@ -62,12 +66,14 @@ const Module = new Augur.Module().addCommand({
     enabled: true, // optional
     permissions: (msg) => msg.channel.permissionsFor(msg.member).has(["MANAGE_MESSAGES", "MANAGE_CHANNELS"]), // optional
     process: (msg, suffix) => {
+      u.preCommand(msg);
         let amount = !!parseInt(suffix.split(' ')[1]) ? parseInt(msg.content.split(' ')[1]) : parseInt(msg.content.split(' ')[2]);
         if (amount > 100) amount = 100;
         msg.channel.messages.fetch({ limit: amount }).then(messages => {
             messages.forEach(message => u.clean(msg));
         });
         msg.channel.send("🔥 Nothing to see here folks, Move along, move along. 🔥");
+        u.postCommand(msg);
     }, // required
 }).addCommand({name: "tag",
 aliases: ["addtag"],
@@ -76,6 +82,7 @@ syntax: "<Command Name> <Command Response>",
 description: "Adds a custom command for your server. The command response can contain @ mentions and other varables as follows:\n <@author> - will be replaced with the message author \n <@authorname> will be replaced with the author's nick name \n <@target> will be replaced with the first @ ed user, \n <@targetname> will be replaced with the first @ed user's username",
 info: "Adds a custom command for your server. If the command has the same name as one of the default commands, the custom command will override the default functionality.",
 process: async (msg, suffix) => {
+  u.preCommand(msg);
   try {
     if (suffix) {
       let args = suffix.split(" ");
@@ -104,6 +111,7 @@ process: async (msg, suffix) => {
     } else
       msg.reply("you need to tell me the command name and the intended command response.").then(u.clean);
   } catch(e) { u.errorHandler(e, msg); }
+  u.postCommand(msg);
 },
 permissions: (msg) => msg.member && (msg.member.permissions.has("MANAGE_GUILD") || msg.member.permissions.has("ADMINISTRATOR") || Module.config.adminId.includes(msg.author.id))
 })

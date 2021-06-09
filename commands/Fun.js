@@ -1,10 +1,15 @@
 const Augur = require("augurbot");
+const { preCommand } = require("../utils/utils");
 const u = require('../utils/utils');
 const Module = new Augur.Module();
 
 async function nicksOffice(msg) {
-    let nicksOffice = "796794621812146176";
-    let nicksOfficeRole = msg.guild.roles.cache.get("796590326529261588");
+    let nicksOfficeRole;
+    if (msg.guild.id == "819031079104151573"){
+        nicksOfficeRole = msg.guild.roles.cache.get("819031079298138184");
+    } else if (msg.guild.id == "639630243111501834") {
+        nicksOfficeRole = msg.guild.roles.cache.get("796590326529261588");
+    }
 
     msg.mentions.members.forEach(member => {
         if (!member.roles.cache.has(nicksOfficeRole)) {
@@ -15,21 +20,25 @@ async function nicksOffice(msg) {
                     return role.id;
                 });
             } catch (error) {
-
+                u.log(error);
             }
-            //msg.channel.send(member.previousRoles.join());
         }
     });
 }
 async function nicksOfficeRestore(msg) {
-    let nicksOfficeRole = msg.guild.roles.cache.get("796590326529261588");
+    let nicksOfficeRole;
+    if (msg.guild.id == "819031079104151573"){
+        nicksOfficeRole = msg.guild.roles.cache.get("819031079298138184");
+    } else if (msg.guild.id == "639630243111501834") {
+        nicksOfficeRole = msg.guild.roles.cache.get("796590326529261588");
+    }
     if (msg.mentions) msg.mentions.members.forEach(member => {
         try {
             member.previousRoles.forEach(element => {
                 member.roles.add(element);
             });
         } catch (error) {
-
+            u.log(error);
         }
         member.previousRoles = null;
         member.roles.remove(nicksOfficeRole);
@@ -48,7 +57,7 @@ Module
         enabled: true, // optional
         permissions: (msg) => true, // optional
         process: (msg) => {
-
+            u.preCommand(msg);
             if (!msg.mentions.users.size) {
                 return msg.channel.send(`${msg.author.displayAvatarURL({ format: "png", dynamic: true })}`);
             }
@@ -58,7 +67,7 @@ Module
             // send the entire array of strings as a message
             // by default, discord.js will `.join()` the array with `\n`
             msg.channel.send(avatarList);
-            u.log(msg);
+            u.postCommand(msg);
         }, // required
     }).addCommand({
         name: "banhammer", // required
@@ -71,10 +80,11 @@ Module
         enabled: true, // optional
         permissions: (msg) => true, // optional
         process: (msg) => {
+            u.preCommand(msg);
+            msg.channel.send('https://tenor.com/view/blob-banned-ban-hammer-blob-ban-emoji-gif-16021044')
             if (!msg.mentions.users.size) {
                 return;
             } else {
-                msg.channel.send('https://tenor.com/view/blob-banned-ban-hammer-blob-ban-emoji-gif-16021044')
                 const avatarList = msg.mentions.users.map(user => {
                     if (user.id == msg.client.config.ownerId) {
                         user = msg.author;
@@ -82,22 +92,7 @@ Module
                     msg.channel.send(`${user} Has been banned for their crimes`);
                 });
             }
-            u.log(msg);
-        } // required
-    }).addCommand({
-        name: "creeper", // required
-        aliases: ["rick", "boom"], // optional
-        syntax: "", // optional
-        description: "Summons a creeper video", // recommended
-        info: "", // recommended
-        hidden: false, // optional
-        category: "Fun", // optional
-        enabled: true, // optional
-        permissions: (msg) => true, // optional
-        process: (msg) => {
-            let holyMessage = `https://cdn.discordapp.com/attachments/776908726480797726/780302118329385030/video0.mp4`;
-            msg.channel.send(holyMessage);
-            u.log(msg);
+            u.postCommand(msg);
         } // required
     }).addCommand({
         name: "petrify", // required
@@ -110,6 +105,7 @@ Module
         enabled: true, // optional
         permissions: (msg) => true, // optional
         process: (msg, suffix) => {
+            u.preCommand(msg);
             function randomNumber(min, max) {
                 let high = Math.max(max, min);
                 let low = Math.min(max, min);
@@ -133,10 +129,9 @@ Module
                         });
                     }
             }
-            u.log(msg);
+            u.postCommand(msg);
         } // required
-    })
-    .addCommand({
+    }).addCommand({
         name: "holyhandgrenade", // required
         aliases: ["holy", "grenade"], // optional
         syntax: "<person>", // optional
@@ -146,8 +141,8 @@ Module
         category: "Fun", // optional
         enabled: true, // optional
         permissions: (msg) => true, // optional
-        process: (msg) => {
-            let { suffix } = u.parse(msg);
+        process: (msg, suffix) => {
+            u.preCommand(msg);
             if (!msg.mentions.users.size && suffix.length == 0) {
                 let holyMessage = `**Book of Armaments, 2:9-21:** \n "And Saint Attila raised the hand grenade up on high, saying: \n> *'O Lord, bless this thy hand grenade, that with it thou mayst blow thine enemies to tiny bits, in thy mercy.'*\n And the Lord did grin. \nAnd the people did feast upon the lambs, and sloths, and carp, and anchovies, and orangutans, and breakfast cereals, and fruit bats, and large chulapas. \n\n\tAnd the Lord spake, saying, \n> *"First shalt thou take out the Holy Pin.* \n> *Then shalt thou count to **three**, no more, no less.* \n> ***Three** shall be the number thou shalt count,* \n> *and the number of the counting shall be **three**.* \n> *Four shalt thou not count,* \n> *neither count thou two, (excepting that thou then proceed to three).* \n> ***Five is right out.*** \n> \n> *Once the number **three**, (being the third number) be reached,*\n> *then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in My sight, shall snuff it.'*`;
                 msg.channel.send(holyMessage);
@@ -164,7 +159,7 @@ Module
                         else msg.channel.send(`${user} hath snuffed it`);
                     });
                 }
-                u.log(msg);
+                u.postCommand(msg);
             } // required
         },
     }).addCommand({
@@ -178,6 +173,7 @@ Module
         enabled: true, // optional
         permissions: (msg) => true, // optional
         process: (msg, suffix) => {
+            u.preCommand(msg);
             let amount = !!parseInt(suffix.split(' ')[1]) ? parseInt(suffix.split(' ')[1]) : parseInt(suffix.split(' ')[2]) || 0;
             function randomNumber(min, max) {
                 let high = Math.max(max, min);
@@ -196,8 +192,7 @@ Module
             if (amount > 0 && amount < 21)
                 msg.channel.send(hollyMessage(amount));
             else msg.channel.send(hollyMessage());
-            u.log(amount);
-            u.log(msg);
+            u.postCommand(msg);
         } // required
     }).addCommand({
         name: "roll", // required
@@ -210,6 +205,7 @@ Module
         enabled: true, // optional
         permissions: (msg) => true, // optional
         process: (msg, suffix, overrideDice, overrideFaces) => {
+            u.preCommand(msg);
             if (!suffix || suffix.toLowerCase().indexOf("d") == -1) {
                 return false;
             }
@@ -233,7 +229,7 @@ Module
                 response = `${result}`;
             }
             msg.channel.send(response);
-            u.log(msg);
+            u.postCommand(msg);
             return result;
         } // required
     }).addCommand({
@@ -243,8 +239,10 @@ Module
         category: "Fun",
         hidden: true,
         process: (msg, suffix) => {
+            u.preCommand(msg);
             if (msg.deletable && (suffix.indexOf("-x") > -1) && (msg.client.config.adminId.includes(msg.author.id) || msg.client.config.ownerId == msg.author.id)) msg.delete();
             msg.channel.send(suffix.replace("-x", ""));
+            u.postCommand(msg);
         },
         permissions: (msg) => true,
     }).addCommand({
@@ -258,9 +256,10 @@ Module
         enabled: true, // optional
         permissions: (msg) => true, // optional
         process: (msg) => {
+            u.preCommand(msg);
             let holyMessage = 'https://media.discordapp.net/attachments/265754164729085952/583353970324406298/image0.jpg?width=803&height=593';
             msg.channel.send(holyMessage);
-            u.log(msg);
+            u.postCommand(msg);
         } // required
     }).addCommand({
         name: "timeout", // required
@@ -271,8 +270,9 @@ Module
         hidden: false, // optional
         category: "Fun", // optional
         enabled: true, // optional
-        permissions: (msg) => (msg.channel.permissionsFor(msg.member).has(["MANAGE_MESSAGES", "MANAGE_CHANNELS"])) && msg.guild.id == "639630243111501834", // optional
+        permissions: (msg) => (msg.channel.permissionsFor(msg.member).has(["MANAGE_MESSAGES", "MANAGE_CHANNELS"])) && (msg.guild.id == "639630243111501834" || msg.guild.id == "819031079104151573"), // optional
         process: (msg, suffix) => {
+            u.preCommand(msg);
             let amount = !!parseInt(suffix.split(' ')[1]) ? parseInt(suffix.split(' ')[1]) : parseInt(suffix.split(' ')[2]) || 5;
             if (!msg.mentions.users.size) {
                 return msg.channel.send(`You need to tell me who you would like to send to time out`);
@@ -280,60 +280,52 @@ Module
             const timeOutList = msg.mentions.users.map(user => {
                 if (!msg.guild.member(user).voice.channel) return;
                 let channel = msg.guild.member(user).voice.channel;
-                msg.guild.member(user).voice.setChannel("794413149558276147");
+                if (msg.guild.id == "819031079104151573") msg.guild.member(user).voice.setChannel("819031084041240648");
+                else msg.guild.member(user).voice.setChannel("794413149558276147");
                 setTimeout((m) => {
                     msg.guild.member(user).voice.setChannel(channel);
                 }, amount * 1000, msg);
             });
             // send the entire array of strings as a message
             // by default, discord.js will `.join()` the array with `\n`
-            u.log(msg);
+            u.postCommand(msg);
         }, // required
     }).addCommand({
-        name: "nicksoffice", // required
+        name: "banish", // required
         aliases: ["office", "mutehammer", "laogai"], // optional
         syntax: "", // optional
-        description: "sends a user to nick's office", // recommended
+        description: "banishes a user", // recommended
         info: "", // recommended
         hidden: true, // optional
         category: "Fun", // optional
         enabled: true, // optional
-        permissions: (msg) => (msg.channel.permissionsFor(msg.member).has(["MANAGE_MESSAGES", "MANAGE_CHANNELS"])) && msg.guild.id == "639630243111501834", // optional
+        permissions: (msg) => (msg.channel.permissionsFor(msg.member).has(["MANAGE_MESSAGES", "MANAGE_CHANNELS"])) && (msg.guild.id == "639630243111501834" || msg.guild.id == "819031079104151573"), // optional
         process: async (msg, suffix) => {
-            msg.channel.startTyping();
+            u.preCommand(msg);
             let amount = !!parseInt(suffix.split(' ')[1]) ? parseInt(suffix.split(' ')[1]) : parseInt(suffix.split(' ')[2]) || 10;
             if (!msg.mentions.users.size) {
-                return msg.channel.send(`You need to tell me who you would like to send to Nick's office`);
+                return msg.channel.send(`You need to tell me who you would like banish`);
             }
             await nicksOffice(msg);
             setTimeout((m) => {
                 nicksOfficeRestore(msg);
             }, amount * 1000, msg);
-            msg.channel.stopTyping();
-            // send the entire array of strings as a message
-            // by default, discord.js will `.join()` the array with 
-            u.log(msg);
+            u.postCommand(msg);
         }, // required
-    }).addEvent("message", (msg) => {
-        //if ((msg.client.config.adminId.includes(msg.author.id) || msg.client.config.ownerId == msg.author.id || msg.author.id == "150065841776492544") && msg.guild.id == "639630243111501834") {
-        if (msg.content.toLowerCase().indexOf("invite") > 0 && msg.content.toLowerCase().indexOf("you to") > 0 && msg.content.toLowerCase().indexOf(nicksOffice(msg)) > 0) {
-            nicksOffice(msg);
-            msg.channel.send("https://media1.tenor.com/images/eb75921cb2fc88489cbc58c7e3de3883/tenor.gif?itemid=18401680");
-        }
-        // }
     }).addCommand({
         name: "thereisnowar", // required
-        aliases: ["basingse", "ba", "nowar"], // optional
+        aliases: ["basingse", "ba", "nowar", "forgive"], // optional
         syntax: "", // optional
-        description: "restores a user from nick's office", // recommended
+        description: "restores a user from banishment", // recommended
         info: "", // recommended
         hidden: true, // optional
         category: "Fun", // optional
         enabled: true, // optional
-        permissions: (msg) => (msg.channel.permissionsFor(msg.member).has(["MANAGE_MESSAGES", "MANAGE_CHANNELS"])) && msg.guild.id == "639630243111501834", // optional
+        permissions: (msg) => (msg.channel.permissionsFor(msg.member).has(["MANAGE_MESSAGES", "MANAGE_CHANNELS"])) && (msg.guild.id == "639630243111501834" || msg.guild.id == "819031079104151573"), // optional
         process: (msg, suffix) => {
+            u.preCommand(msg);
             nicksOfficeRestore(msg);
-            u.log(msg);
+            u.postCommand(msg);
         }, // required
     }).addEvent("message", (msg) => {
         if (msg.author.bot) { return }
@@ -354,6 +346,8 @@ Module
             }
             try {
                 msg.member.setNickname(dadJokeName, "For the memes");
+                u.log("Hi " + dadJokeName + " I'm Dad!");
+                u.clean(msg.channel.send("Hi " + dadJokeName + " I'm Dad!"));
             } catch (error) {
                 u.log(error);
             }
