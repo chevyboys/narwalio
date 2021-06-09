@@ -50,12 +50,12 @@ const Module = new Augur.Module()
 .addCommand({name: "inventory",
   description: "Check your color inventory.",
   category: "Members",
-  aliases: ["flex"],
+  aliases: ["flex", "inv"],
   permissions: (msg) => true,
   process: async (msg) => {
     try {
       let member;
-        if(msg.mentions.users.size > -1)  {
+        if(msg.mentions.users.size > 0)  {
            member = await msg.guild.members.fetch(msg.mentions.users.last().id);
         }
         else member = await msg.guild.members.fetch(msg.author.id); 
