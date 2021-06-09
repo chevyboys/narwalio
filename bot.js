@@ -6,7 +6,8 @@ const colors = require('colors');
 const client = new AugurClient(config, {
     clientOptions: {
         disableMentions: "everyone",
-        partials: ["REACTION", "MESSAGE"]
+        partials: ["REACTION", "MESSAGE"],
+        parse: u.parse,
     },
     commands: "./commands",
     errorHandler: u.errorHandler,

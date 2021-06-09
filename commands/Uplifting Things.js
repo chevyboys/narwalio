@@ -4,6 +4,7 @@ const u = require("../utils/utils");
 const fetch = require("node-fetch");
 const colors = require('colors');
 const lastGoodMorningSent = new Discord.Collection();
+const fs = require('fs');
 
 
 function loadCuties(msg, suffix, subreddit, limit) {
@@ -140,7 +141,6 @@ const Module = new Augur.Module()
             return returner;
         }
     }).addEvent("presenceUpdate", async (oldPresence, newPresence) => {
-        
         if (!newPresence.member.roles.cache.has('796965135054143488') && !newPresence.member.roles.cache.some(role => role.name === `Narwalio's Favorite`)) { return };
         const now = new Date();
         const [hour, minute, second] = new Date().toLocaleTimeString("en-US", { hour: 'numeric', hour12: false }).split(/:| /);
@@ -178,6 +178,7 @@ const Module = new Augur.Module()
             }
             loadCuties(fakeMsg, " ", subreddit, 100)
             lastGoodMorningSent.set(newPresence.member.user.id, day);
+
         }
         /*if (newPresence.status == "online") { console.log(`Presence: ${newPresence.guild.name}: ${newPresence.member.nickname || newPresence.user.name} is now ${newPresence.status}`.green); }
         else if (newPresence.status == "offline") { console.log(`Presence: ${newPresence.guild.name}: ${newPresence.member.nickname || newPresence.user.name} is now ${newPresence.status}`.gray); }
@@ -186,4 +187,8 @@ const Module = new Augur.Module()
 */
 
     });
+Module.setUnload(function() {
+    const data = JSON.stringify(lastGoodMorningSent, null, 4);
+    fs.writeFileSync('./storage/LastGoodMorningSent.json', data);
+});
 module.exports = Module;

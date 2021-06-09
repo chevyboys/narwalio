@@ -6,6 +6,7 @@ let fs = require("fs");
 const { AugurClient } = require("augurbot");
 const colors = require('colors');
 const cron = require('cron');
+const GlobalBlackList = require("../storage/GlobalBlacklist.json");
 
 const errorLog = new Discord.WebhookClient(config.devLogs.error.id, config.devLogs.error.token);
 let serverSettings = new Map();
@@ -152,25 +153,23 @@ const Utils = {
 
     },
     parse: (msg, clean = false) => {
-        for (const prefix of [config.prefix, `<@${msg.client.user.id}>`, `<@!${msg.client.user.id}>`]) {
-            const content = clean ? msg.cleanContent : msg.content;
+        let content = msg.content;
+        let setPrefix = msg.client.config.prefix || "!";
+        if (msg.author.bot) return null;
+        for (let prefix of [setPrefix, `<@${msg.client.user.id}>`, `<@!${msg.client.user.id}>`]) {
             if (!content.startsWith(prefix)) continue;
-            const parts = content.split(" ");
-            let command, suffix;
-            if (parts[0] == prefix) {
-                parts.shift();
-                command = parts.shift();
-            }
-            else {
-                command = parts.shift().substr(prefix.length);
-            }
+            let trimmed = content.substr(prefix.length).trim();
+            let [command, ...params] = content.substr(prefix.length).split(" ");
             if (command) {
+                u.log(msg);
                 return {
                     command: command.toLowerCase(),
-                    suffix: parts.join(" "),
+                    suffix: params.join(" "),
+                    params
                 };
-            } else throw "no command found"
+            }
         }
+        return null;
     },
     properCase: (txt) => txt.split(" ").map(word => (word[0].toUpperCase() + word.substr(1).toLowerCase())).join(" "),
     //sets the avatar of the bot
