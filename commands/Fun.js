@@ -5,7 +5,7 @@ const Module = new Augur.Module();
 
 async function nicksOffice(msg) {
     let nicksOfficeRole;
-    if (msg.guild.id == "819031079104151573"){
+    if (msg.guild.id == "819031079104151573") {
         nicksOfficeRole = msg.guild.roles.cache.get("819031079298138184");
     } else if (msg.guild.id == "639630243111501834") {
         nicksOfficeRole = msg.guild.roles.cache.get("796590326529261588");
@@ -16,8 +16,16 @@ async function nicksOffice(msg) {
             member.roles.add(nicksOfficeRole);
             try {
                 member.previousRoles = member.roles.cache.map(role => {
-                    member.roles.remove(role.id);
-                    return role.id;
+                    if (role.id != "833852680581152828" && role.id != "819031079104151573");
+                    {
+                        try {
+                            member.roles.remove(role.id);
+                            return role.id;
+                        } catch (error) {
+                            u.log("could not remove: " + role.id);
+                        }
+                    }
+
                 });
             } catch (error) {
                 u.log(error);
@@ -27,7 +35,7 @@ async function nicksOffice(msg) {
 }
 async function nicksOfficeRestore(msg) {
     let nicksOfficeRole;
-    if (msg.guild.id == "819031079104151573"){
+    if (msg.guild.id == "819031079104151573") {
         nicksOfficeRole = msg.guild.roles.cache.get("819031079298138184");
     } else if (msg.guild.id == "639630243111501834") {
         nicksOfficeRole = msg.guild.roles.cache.get("796590326529261588");
@@ -43,6 +51,12 @@ async function nicksOfficeRestore(msg) {
         member.previousRoles = null;
         member.roles.remove(nicksOfficeRole);
     });
+}
+
+async function dadJokeRestore(msg) {
+    if (!msg.member.previousNick) return;
+        await msg.member.setNickname(msg.member.previousNick, "Restoring order");
+        msg.member.previousNick = null;
 }
 
 Module
@@ -328,12 +342,13 @@ Module
             u.postCommand(msg);
         }, // required
     }).addEvent("message", (msg) => {
+        const amount = 600;
         if (msg.author.bot) { return }
         var ran = Math.random();
         var oddsThatNothingHappens = 0.95;
         if (ran < oddsThatNothingHappens && !(msg.author.id == "548618555676033039")) { return }
         let im;
-        let content = ` `+ msg.content.toLowerCase();
+        let content = ` ` + msg.content.toLowerCase();
         content = content.replace(" i am ", " im ").replace(" i'm ", " im ")
         if (content.indexOf(" im ") > -1) {
             im = content.indexOf(" im ");
@@ -341,13 +356,21 @@ Module
             if (subStrLeng > 30) subStrLeng = 30;
             let dadJokeName = content.substr(im + 3, subStrLeng);
             dadJokeName = dadJokeName.charAt(1).toUpperCase() + dadJokeName.substr(2, dadJokeName.length);
-            if(msg.author.id == "548618555676033039") {
+            if (msg.author.id == "548618555676033039") {
                 dadJokeName = `▲${dadJokeName}▲`;
             }
             try {
+                msg.channel.startTyping();
+                if(!msg.member.previousNick) {
+                    msg.member.previousNick = msg.member.displayName;
+                }
                 msg.member.setNickname(dadJokeName, "For the memes");
                 u.log("Hi " + dadJokeName + " I'm Dad!");
                 u.clean(msg.channel.send("Hi " + dadJokeName + " I'm Dad!"));
+                setTimeout( async (m)  =>  {
+                    await dadJokeRestore(msg);
+                    msg.channel.stopTyping();
+                }, amount * 1000, msg);
             } catch (error) {
                 u.log(error);
             }
