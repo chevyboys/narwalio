@@ -313,7 +313,7 @@ Module
         hidden: true, // optional
         category: "Fun", // optional
         enabled: true, // optional
-        permissions: (msg) => (msg.channel.permissionsFor(msg.member).has(["MANAGE_MESSAGES", "MANAGE_CHANNELS"])) && (msg.guild.id == "639630243111501834" || msg.guild.id == "819031079104151573"), // optional
+        permissions: (msg) => (msg.channel.permissionsFor(msg.member).has(["MANAGE_MESSAGES"])) && (msg.guild.id == "639630243111501834" || msg.guild.id == "819031079104151573"), // optional
         process: async (msg, suffix) => {
             u.preCommand(msg);
             let amount = !!parseInt(suffix.split(' ')[1]) ? parseInt(suffix.split(' ')[1]) : parseInt(suffix.split(' ')[2]) || 10;
@@ -357,23 +357,24 @@ Module
             let dadJokeName = content.substr(im + 3, subStrLeng);
             dadJokeName = dadJokeName.charAt(1).toUpperCase() + dadJokeName.substr(2, dadJokeName.length);
             if (msg.author.id == "548618555676033039") {
-                dadJokeName = `▲${dadJokeName}▲`;
-            }
-            try {
-                msg.channel.startTyping();
-                if(!msg.member.previousNick) {
-                    msg.member.previousNick = msg.member.displayName;
+                        dadJokeName = `▲${dadJokeName}▲`;
+                    }
+                    try {
+                        msg.channel.startTyping();
+                        if(!msg.member.previousNick) {
+                            msg.member.previousNick = msg.member.displayName;
+                        }
+                        msg.member.setNickname(dadJokeName, "For the memes");
+                        u.log("Hi " + dadJokeName + " I'm Dad!");
+                        u.clean(msg.channel.send("Hi " + dadJokeName + " I'm Dad!"));
+                        setTimeout( async (m)  =>  {
+                            msg.channel.stopTyping();
+                            await dadJokeRestore(msg);
+                            
+                        }, amount * 1000, msg);
+                    } catch (error) {
+                        u.log(error);
+                    }
                 }
-                msg.member.setNickname(dadJokeName, "For the memes");
-                u.log("Hi " + dadJokeName + " I'm Dad!");
-                u.clean(msg.channel.send("Hi " + dadJokeName + " I'm Dad!"));
-                setTimeout( async (m)  =>  {
-                    await dadJokeRestore(msg);
-                    msg.channel.stopTyping();
-                }, amount * 1000, msg);
-            } catch (error) {
-                u.log(error);
-            }
-        }
-    });
-module.exports = Module;
+            });
+        module.exports = Module;
