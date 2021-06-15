@@ -204,7 +204,7 @@ Module.addCommand({
             u.preCommand(msg);
             let spawn = require("child_process").spawn;
             u.clean(msg);
-            //run commit
+            //run commit command
             let cmd = spawn("git", ["commit", "-a", "-m", "Bot Commit" + suffix], { cwd: process.cwd() });
             let stdout = [];
             let stderr = [];
