@@ -195,6 +195,38 @@ Module.addCommand({
             u.postCommand(msg);
         },
         permissions: (msg) => (Module.config.ownerId === (msg.author.id))
+    }).addCommand({
+        name: "push",
+        category: "Bot Admin",
+        description: "push bot updates to git",
+        hidden: true,
+        process: (msg) => {
+            u.preCommand(msg);
+            let spawn = require("child_process").spawn;
+
+            u.clean(msg);
+
+            let cmd = spawn("git", ["push"], { cwd: process.cwd() });
+            let stdout = [];
+            let stderr = [];
+
+            cmd.stdout.on("data", data => {
+                stdout.push(data);
+            });
+
+            cmd.stderr.on("data", data => {
+                stderr.push(data);
+            });
+
+            cmd.on("close", code => {
+                if (code == 0)
+                    msg.channel.send(stdout.join("\n") + "\n\nCompleted with code: " + code).then(u.clean);
+                else
+                    msg.channel.send(`ERROR CODE ${code}:\n${stderr.join("\n")}`).then(u.clean);
+            });
+            u.postCommand(msg);
+        },
+        permissions: (msg) => (Module.config.ownerId === (msg.author.id))
     })
     .addCommand({
         name: "pulse",
