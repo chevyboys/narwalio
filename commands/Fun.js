@@ -52,11 +52,35 @@ async function nicksOfficeRestore(msg) {
         member.roles.remove(nicksOfficeRole);
     });
 }
+async function silence(msg) {
+    let silenceRole;
+    if (msg.guild.id == "819031079104151573") {
+        silenceRole = msg.guild.roles.cache.get("819031079268122634");
+    } else if (msg.guild.id == "639630243111501834") {
+        silenceRole = msg.guild.roles.cache.get("753462049723646013");
+    }
 
+    msg.mentions.members.forEach(member => {
+        if (!member.roles.cache.has(silenceRole)) {
+            member.roles.add(silenceRole);
+        }
+    });
+}
+async function silenceRestore(msg) {
+    let silenceRole;
+    if (msg.guild.id == "819031079104151573") {
+        silenceRole = msg.guild.roles.cache.get("819031079268122634");
+    } else if (msg.guild.id == "639630243111501834") {
+        silenceRole = msg.guild.roles.cache.get("753462049723646013");
+    }
+    if (msg.mentions) msg.mentions.members.forEach(member => {
+        member.roles.remove(silenceRole);
+    });
+}
 async function dadJokeRestore(msg) {
     if (!msg.member.previousNick) return;
-        await msg.member.setNickname(msg.member.previousNick, "Restoring order");
-        msg.member.previousNick = null;
+    await msg.member.setNickname(msg.member.previousNick, "Restoring order");
+    msg.member.previousNick = null;
 }
 
 Module
@@ -341,6 +365,29 @@ Module
             nicksOfficeRestore(msg);
             u.postCommand(msg);
         }, // required
+    }).addCommand({
+        name: "mute", // required
+        aliases: ["silence"], // optional
+        syntax: "", // optional
+        description: "silences a user", // recommended
+        info: "", // recommended
+        hidden: true, // optional
+        category: "Fun", // optional
+        enabled: true, // optional
+        permissions: (msg) => (msg.channel.permissionsFor(msg.member).has(["MANAGE_MESSAGES"])) && (msg.guild.id == "639630243111501834" || msg.guild.id == "819031079104151573"), // optional
+        process: async (msg, suffix) => {
+            u.preCommand(msg);
+            let amount = !!parseInt(suffix.split(' ')[1]) ? parseInt(suffix.split(' ')[1]) : parseInt(suffix.split(' ')[2]) || 60; //how long to silence in minutes
+            if (!msg.mentions.users.size) {
+                return msg.channel.send(`You need to tell me who you would like silence`);
+            }
+            msg.react("😶");
+            await silence(msg);
+            setTimeout((m) => {
+                silenceRestore(msg);
+            }, amount * 60000, msg);
+            u.postCommand(msg);
+        }, // required
     }).addEvent("message", (msg) => {
         const amount = 600;
         if (msg.author.bot) { return }
@@ -353,28 +400,38 @@ Module
         if (content.indexOf(" im ") > -1) {
             im = content.indexOf(" im ");
             subStrLeng = content.length - im;
-            if (subStrLeng > 30) subStrLeng = 30;
+            if (subStrLeng > 23) subStrLeng = 23;
+            if (msg.author.id == "548618555676033039") {
+                if (subStrLeng > 21) subStrLeng = 21;
+            }
             let dadJokeName = content.substr(im + 3, subStrLeng);
             dadJokeName = dadJokeName.charAt(1).toUpperCase() + dadJokeName.substr(2, dadJokeName.length);
-            if (msg.author.id == "548618555676033039") {
-                        dadJokeName = `▲${dadJokeName}▲`;
-                    }
-                    try {
-                        msg.channel.startTyping();
-                        if(!msg.member.previousNick) {
-                            msg.member.previousNick = msg.member.displayName;
-                        }
-                        msg.member.setNickname(dadJokeName, "For the memes");
-                        u.log("Hi " + dadJokeName + " I'm Dad!");
-                        u.clean(msg.channel.send("Hi " + dadJokeName + " I'm Dad!"));
-                        setTimeout( async (m)  =>  {
-                            msg.channel.stopTyping();
-                            await dadJokeRestore(msg);
-                            
-                        }, amount * 1000, msg);
-                    } catch (error) {
-                        u.log(error);
-                    }
+            if (msg.author.id == "548618555676033039") {   
+                dadJokeName = `▲${dadJokeName}▲`;
+            }
+            if (msg.member.roles.cache.has("819031079298138187")){
+                dadJokeName = `${dadJokeName} | Admin`;
+            } else if (msg.member.roles.cache.has("819035372390449193")){
+                dadJokeName = `${dadJokeName} | Mod`;
+            } else if (msg.member.roles.cache.has("849748022786129961")){
+                dadJokeName = `${dadJokeName} | Team`;
+            }
+            try {
+                msg.channel.startTyping();
+                if (!msg.member.previousNick) {
+                    msg.member.previousNick = msg.member.displayName;
                 }
-            });
-        module.exports = Module;
+                msg.member.setNickname(dadJokeName, "For the memes");
+                u.log("Hi " + dadJokeName + " I'm Dad!");
+                u.clean(msg.channel.send("Hi " + dadJokeName + " I'm Dad!"));
+                setTimeout(async (m) => {
+                    msg.channel.stopTyping();
+                    await dadJokeRestore(msg);
+
+                }, amount * 1000, msg);
+            } catch (error) {
+                u.log(error);
+            }
+        }
+    })
+module.exports = Module;

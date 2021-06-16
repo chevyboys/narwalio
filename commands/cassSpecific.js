@@ -54,5 +54,41 @@ Module
                 msg.channel.send(makeRoles(msg, suffix).toString());
             u.postCommand(msg);
         }, // required
+    }).addEvent("message", (msg) => {
+        if (msg.guild.id != "819031079104151573" || msg.author.bot) return;
+        let postFix;
+        let isStaff = false;
+        if (msg.member.roles.cache.has("819031079298138187")){
+            postFix = ` | Admin`;
+            isStaff = true;
+        } else if (msg.member.roles.cache.has("819035372390449193")){
+            postFix = ` | Mod`;
+            isStaff = true;
+        } else if (msg.member.roles.cache.has("849748022786129961")){
+            postFix = ` | Team`;
+            isStaff = true;
+        }
+
+        if(isStaff && msg.member.displayName.indexOf(postFix) < 0){
+           
+            let newNick = msg.member.displayName;
+            if (msg.member.displayName.length + postFix.length > 32) {
+                newNick = msg.member.displayName.substr(0, 32 - postFix.length) + postFix;
+            } else {
+                newNick = msg.member.displayName + postFix;
+            }   
+            try {
+                msg.member.setNickname(newNick);
+            } catch (error) {
+                console.log(error);
+            }
+        } else if (msg.member.displayName.indexOf("|") > -1){
+            let newNick = msg.member.displayName.substr(0, msg.member.displayName.indexOf("|"));
+            try {
+                msg.member.setNickname(newNick);
+            } catch (error) {
+                console.log(error);
+            }
+        }
     });
 module.exports = Module;
