@@ -71,8 +71,23 @@ Module.addCommand({
         }
         u.postCommand(msg)
     } // required
-})
-    .addCommand({
+}).addCommand({
+    name: "channels", // required
+    hidden: true, // optional
+    description: "shows unveiwable channels. !channels <roleid>",
+    permissions: (msg) => config.adminId.includes(msg.author.id) || config.ownerId == msg.author.id, // optional
+    process: async (msg, suffix) => {
+        u.preCommand(msg)
+        let construct = await msg.guild.roles.cache.get(suffix)
+        msg.guild.channels.cache.map(channel => {
+            let perms = construct.permissionsIn(channel).has("VIEW_CHANNEL");
+            if(!perms){
+                msg.channel.send(channel.name);
+            }
+        });
+        u.postCommand(msg);
+    }
+}).addCommand({
         name: "gotobed",
         category: "Bot Admin",
         hidden: true,
@@ -253,6 +268,7 @@ Module.addCommand({
             for (const file of files) {
                 try {
                     msg.client.moduleHandler.reload(path.resolve(__dirname, file));
+                    console.log(file + " has been reloaded");      
                 } catch (error) { msg.client.errorHandler(error, msg); }
             }
             msg.react("👌");

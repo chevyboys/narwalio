@@ -136,7 +136,7 @@ const Utils = {
                 username = msg.author.username;
             }
             commandName = msg.cleanContent.substr(0, msg.content.indexOf(" "));
-            logger = (`${hour}:${minute}:${second}: `) + username + " called " + commandName + " \n> " + msg.cleanContent + "\n" + Utils.getMessageLink(msg);
+            logger = (`${msg.client.username} | ${hour}:${minute}:${second}: `) + username + " called " + commandName + " \n> " + msg.cleanContent + "\n" + Utils.getMessageLink(msg);
             if (msg && msg.client && msg.client.config && msg.client.config.token && msg.client.config.devLogs && msg.client.config.devLogs.token) {
                 logger = logger.replace(msg.client.config.token, 'TOKEN-THAT-WAS-NEARLY-LEAKED').replace(msg.client.config.devLogs.token, 'WEBHOOK-TOKEN');
             }

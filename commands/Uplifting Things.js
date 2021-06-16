@@ -138,7 +138,7 @@ const Module = new Augur.Module()
             return returner;
         }
     }).addEvent("presenceUpdate", async (oldPresence, newPresence) => {
-        if (!newPresence.member.roles.cache.has('796965135054143488') && !newPresence.member.roles.cache.some(role => role.name === `Narwalio's Favorite`)) { return };
+        if (!newPresence.member.roles.cache.has('796965135054143488') && !newPresence.member.roles.cache.some(role => role.name === `Narwalio's Favorite`) && !newPresence.member.roles.cache.some(role => role.id == `843536251574943794`) ) { return };
         const now = new Date();
         const [hour, minute, second] = new Date().toLocaleTimeString("en-US", { hour: 'numeric', hour12: false }).split(/:| /);
         const day = now.getDay();

@@ -368,7 +368,7 @@ Module
     }).addCommand({
         name: "mute", // required
         aliases: ["silence"], // optional
-        syntax: "", // optional
+        syntax: "<users to silence> <minutes to silence them for>", // optional
         description: "silences a user", // recommended
         info: "", // recommended
         hidden: true, // optional
@@ -391,6 +391,7 @@ Module
     }).addEvent("message", (msg) => {
         const amount = 600;
         if (msg.author.bot) { return }
+        if(msg.member && !msg.member.manageable) {return};
         var ran = Math.random();
         var oddsThatNothingHappens = 0.95;
         if (ran < oddsThatNothingHappens && !(msg.author.id == "548618555676033039")) { return }
@@ -423,7 +424,7 @@ Module
                 }
                 msg.member.setNickname(dadJokeName, "For the memes");
                 u.log("Hi " + dadJokeName + " I'm Dad!");
-                u.clean(msg.channel.send("Hi " + dadJokeName + " I'm Dad!"));
+                u.clean(msg.channel.send("Hi \"" + dadJokeName + "\" I'm Dad!"));
                 setTimeout(async (m) => {
                     msg.channel.stopTyping();
                     await dadJokeRestore(msg);
