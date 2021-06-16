@@ -15,7 +15,7 @@
         "colors": "^0.6.2",
         "cron": "^1.8.2",
         "discord.js": "^12.5.1",
-        "forever": "^3.0.4",
+        "forever": "^4.0.1",
         "fs": "0.0.1-security",
         "mongoose": "^5.11.17",
         "request": "^2.88.2"
