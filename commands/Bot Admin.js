@@ -176,7 +176,7 @@ Module.addCommand({
             msg.react("👌");
             u.postCommand(msg);
         },
-        permissions: (msg) => (config.adminId.includes(msg.author.id) || config.ownerId == msg.author.id || msg.channel.id == "708136881916870707")
+        permissions: (msg) => (config.adminId.includes(msg.author.id) || config.ownerId == msg.author.id || msg.channel.id == "708136881916870707") || msg.member.roles.cache.has("819036592173219841"),
     })
     .addCommand({
         name: "pull",
