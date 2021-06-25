@@ -10,7 +10,7 @@ class Item {
     consumable;
     process;
     passive;
-
+    static items = [];
 
     constructor(options) {
         this.roleID = options.roleID;
@@ -22,16 +22,17 @@ class Item {
         if (options.passive) {
             this.passive = true;
         } else this.passive = false;
+        items.push(options);
 
     }
 
-    async use(msg, member) {
-        if (this.consumable) {
+    async use(msg, member, empowered) {
+        if (this.consumable && !empowered) {
             await member.roles.remove(this.roleID);
         }
         if (this.passive) {
             u.clean(msg.reply("This is a passive ability"));
-        } else this.process(msg, member);
+        } else this.process(msg, member, empowered);
     }
 
 }
@@ -130,7 +131,7 @@ async function paintball(msg, suffix) {
         }
         else target = await msg.guild.members.fetch(msg.author.id);
         let availableRoles = [].concat(...(inventory.filter((v, k) => msg.member.roles.cache.has(k)).array()));
-        target.currentColors = target.roles.color;
+        if (!target.currentColors) target.currentColors = target.roles.color;
         let toAdd;
         if (msg.mentions.roles.size > 0) {
           toAdd = msg.mentions.roles.first()
@@ -161,7 +162,7 @@ async function paintballRestore(msg, suffix) {
         await target.roles.remove([].concat(...(inventory.filter((v, k) => msg.member.roles.cache.has(k)).array())));
         await target.roles.add(target.currentColors.id);
     }
-
+    target.currentColors = null;
 }
 //items
 let MuteHammer = new Item({
@@ -170,13 +171,14 @@ let MuteHammer = new Item({
     emoji: "🔇",
     description: "Allows the user to mute one person for 60 seconds",
     consumable: true,
-    process: async (msg) => {
+    process: async (msg, target, empowered) => {
         let amount = 60
+        if (empowered) amount = amount *10;
         if (!msg.mentions.users.size) {
             return msg.channel.send(`You need to tell me who you would like silence`);
         }
         msg.react(MuteHammer.emoji);
-        let target = await silence(msg);
+        let target = await silence(msg, empowered);
         setTimeout((m) => {
             silenceRestore(msg, target);
         }, amount * 1000, msg);
@@ -189,19 +191,24 @@ let BanishHammer = new Item({
     emoji: "🔨",
     description: "Allows the user to banish one person for 30 seconds",
     consumable: true,
-    process: async (msg) => {
+    process: async (msg, target, empowered) => {
         let amount = 30
+        if (empowered) amount = amount *10;
         if (!msg.mentions.users.size) {
             return msg.channel.send(`You need to tell me who you would like banish`);
         }
-        if ((msg.mentions.members.first().permissions.has("MANAGE_GUILD") || msg.mentions.members.first().permissions.has("ADMINISTRATOR") || msg.client.config.adminId.includes(msg.mentions.members.first().id))) {
+        if ((msg.mentions.members.first().permissions.has("MANAGE_GUILD") || msg.mentions.members.first().permissions.has("ADMINISTRATOR") || msg.client.config.adminId.includes(msg.mentions.members.first().id)) && !empowered) {
             msg.channel.send("You try to banish <@" + member.id + "> but their powers are too great. The hammer fails to banish them")
             member = msg.member;
         }
         if (msg.mentions.members.first().roles.cache.has("857772273389666324")) {
-            msg.channel.send("You try to banish <@" + msg.mentions.members.first().id + "> but they are shielded. The hammer fails to banish them");
             Shield.process(msg, msg.mentions.members.first());
+            if (empowered){
+                msg.channel.send("You banish <@" + msg.mentions.members.first().id + ">. Their sheild is no match for you empowered command.");
+            }
+            else { msg.channel.send("You try to banish <@" + msg.mentions.members.first().id + "> but they are shielded. The hammer fails to banish them");
             return;
+        }
         }
         msg.react(BanishHammer.emoji);
         nicksOffice(msg);
@@ -238,21 +245,26 @@ let Paintball = new Item({
     emoji: "🖌",
     description: "Lets you temporarily force one of your own colors on someone else",
     consumable: true,
-    process: async (msg) => {
+    process: async (msg, target, empowered) => {
         let {suffix} = u.parse(msg);
         let amount = 600
+        if (empowered) amount = amount * 10;
         if (!msg.mentions.users.size) {
             return msg.channel.send(`You need to tell me who you would like paint`);
         }
-        if ((msg.mentions.members.first().permissions.has("MANAGE_GUILD") || msg.mentions.members.first().permissions.has("ADMINISTRATOR") || msg.client.config.adminId.includes(msg.mentions.members.first().id))) {
+        if ((msg.mentions.members.first().permissions.has("MANAGE_GUILD") || msg.mentions.members.first().permissions.has("ADMINISTRATOR") || msg.client.config.adminId.includes(msg.mentions.members.first().id)) && !empowered) {
             msg.channel.send("You try to hit <@" + member.id + "> with a paintball but they easily dodge.")
             member = msg.member;
         }
         if (msg.mentions.members.first().roles.cache.has("857772273389666324")) {
-            msg.channel.send("You try to hit <@" + msg.mentions.members.first().id + "> with a paintball but they are shielded.");
             Shield.process(msg, msg.mentions.members.first());
+            if (empowered){
+                msg.channel.send("Blazing with the power of the sun, you forcably recast <@" + msg.mentions.members.first().id + ">'s colors. Their sheild is no match for you empowered command.");
+            }
+            else { msg.channel.send("You try to paint <@" + msg.mentions.members.first().id + "> but they are shielded.");
             return;
         }
+    }
         msg.react(Paintball.emoji);
         paintball(msg, suffix.replace(/<+.*>\s*/gm, "").replace(/:+.*:\s*/gm, "").trim());
         setTimeout((m) => {
@@ -261,6 +273,43 @@ let Paintball = new Item({
     }
 })
 
-const items = [BanishHammer, MuteHammer, Shield, Paintball];
+let Shatter = new Item({
+    roleID: "858057300399620136",
+    name: "Shatter",
+    emoji: "☄",
+    description: "Lets you destroy a random item from someone else",
+    consumable: true,
+    process: async (msg, target, empowered) => {
+        let {suffix} = u.parse(msg);
+        if (!msg.mentions.users.size) {
+            return msg.channel.send(`You need to tell me who you would like use shatter on`);
+        }
+        if ((msg.mentions.members.first().permissions.has("MANAGE_GUILD") || msg.mentions.members.first().permissions.has("ADMINISTRATOR") || msg.client.config.adminId.includes(msg.mentions.members.first().id)) && !empowered) {
+            msg.channel.send("You try to shatter <@" + member.id + ">'s items, but it seems that it has no effect.")
+            member = msg.member;
+        }
+        if (msg.mentions.members.first().roles.cache.has("857772273389666324")) {
+            Shield.process(msg, msg.mentions.members.first());
+            if (empowered){
+                msg.channel.send("<@" + msg.mentions.members.first().id + ">'s sheild is no match for you empowered command.");
+            }
+            else { msg.channel.send("You shatter <@" + msg.mentions.members.first().id + ">'s sheild");
+            msg.mentions.members.first().roles.remove("857772273389666324");
+            return;
+        }
+    }
+    let availableItems = [].concat(...(items.filter(i => {
+         return msg.mentions.members.first().roles.cache.has(i.roleID);
+      })));
+        msg.react(Shatter.emoji);
+        if(!empowered) await msg.mentions.members.first().roles.remove(u.rand(availableItems).roleID);
+        else {
+            availableItems.forEach(async element => {
+                await msg.mentions.members.first().roles.remove(element.roleID);
+            });
+        }
+    }
+})
+const items = [BanishHammer, MuteHammer, Shield, Paintball, Shatter];
 
 module.exports = items;
