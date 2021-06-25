@@ -10,7 +10,7 @@ class Item {
     consumable;
     process;
     passive;
-    static items = [];
+    static items;
 
     constructor(options) {
         this.roleID = options.roleID;
@@ -22,7 +22,10 @@ class Item {
         if (options.passive) {
             this.passive = true;
         } else this.passive = false;
-        items.push(options);
+        if(!this.items){
+            this.items = [];
+        }
+        this.items.push(options);
 
     }
 
@@ -171,7 +174,7 @@ let MuteHammer = new Item({
     emoji: "🔇",
     description: "Allows the user to mute one person for 60 seconds",
     consumable: true,
-    process: async (msg, target, empowered) => {
+    process: async (msg, member, empowered) => {
         let amount = 60
         if (empowered) amount = amount *10;
         if (!msg.mentions.users.size) {
@@ -292,6 +295,7 @@ let Shatter = new Item({
             Shield.process(msg, msg.mentions.members.first());
             if (empowered){
                 msg.channel.send("<@" + msg.mentions.members.first().id + ">'s sheild is no match for you empowered command.");
+                msg.react(Shield.emoji);
             }
             else { msg.channel.send("You shatter <@" + msg.mentions.members.first().id + ">'s sheild");
             msg.mentions.members.first().roles.remove("857772273389666324");
@@ -301,11 +305,21 @@ let Shatter = new Item({
     let availableItems = [].concat(...(items.filter(i => {
          return msg.mentions.members.first().roles.cache.has(i.roleID);
       })));
+      let removedRole = u.rand(availableItems);
+      if (!removedRole) {
+          u.clean(msg.channel.send("<@" + msg.mentions.members.first().id + "> has no items to shatter"));
+          return;
+      }
         msg.react(Shatter.emoji);
-        if(!empowered) await msg.mentions.members.first().roles.remove(u.rand(availableItems).roleID);
+        if(!empowered){
+            await msg.mentions.members.first().roles.remove(removedRole.roleID);
+            msg.channel.send("You shatter <@" + msg.mentions.members.first().id + ">'s " + removedRole.name)
+            msg.react(removedRole.emoji);
+        } 
         else {
             availableItems.forEach(async element => {
                 await msg.mentions.members.first().roles.remove(element.roleID);
+                msg.react(element.emoji);
             });
         }
     }

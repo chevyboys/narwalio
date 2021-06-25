@@ -25,7 +25,7 @@ function grantWishes(roleID, oddsThatNothingHappens = 0.7) {
 
 Module.addCommand({
   name: "use",
-  alias: ["empower"],
+  aliases: ["empower"],
   description: "use an item from your inventory.",
   process: async (msg, suffix, params) => {
     u.preCommand(msg);
