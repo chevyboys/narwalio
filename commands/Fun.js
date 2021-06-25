@@ -330,7 +330,7 @@ Module
         }, // required
     }).addCommand({
         name: "banish", // required
-        aliases: ["office", "mutehammer", "laogai"], // optional
+        aliases: ["office", "laogai"], // optional
         syntax: "", // optional
         description: "banishes a user", // recommended
         info: "", // recommended
@@ -367,7 +367,7 @@ Module
         }, // required
     }).addCommand({
         name: "mute", // required
-        aliases: ["silence"], // optional
+        aliases: ["silence", "mutehammer"], // optional
         syntax: "<users to silence> <minutes to silence them for>", // optional
         description: "silences a user", // recommended
         info: "", // recommended
@@ -377,7 +377,7 @@ Module
         permissions: (msg) => (msg.channel.permissionsFor(msg.member).has(["MANAGE_MESSAGES"])) && (msg.guild.id == "639630243111501834" || msg.guild.id == "819031079104151573"), // optional
         process: async (msg, suffix) => {
             u.preCommand(msg);
-            let amount = !!parseInt(suffix.split(' ')[1]) ? parseInt(suffix.split(' ')[1]) : parseInt(suffix.split(' ')[2]) || 60; //how long to silence in minutes
+            let amount = parseInt(suffix.split(' ')[1]) ? parseInt(suffix.split(' ')[1]) : parseInt(suffix.split(' ')[2]) || 60; //how long to silence in minutes
             if (!msg.mentions.users.size) {
                 return msg.channel.send(`You need to tell me who you would like silence`);
             }
@@ -401,6 +401,10 @@ Module
         if (content.indexOf(" im ") > -1) {
             im = content.indexOf(" im ");
             subStrLeng = content.length - im;
+            if (msg.member.roles.cache.has("857772273389666324") || (msg.member.roles.cache.some(r => r.name.toLowerCase() === "🛡"))) {
+                msg.react("🛡");
+                return;
+            }
             if (subStrLeng > 23) subStrLeng = 23;
             if (msg.author.id == "548618555676033039") {
                 if (subStrLeng > 21) subStrLeng = 21;

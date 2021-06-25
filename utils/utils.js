@@ -6,7 +6,6 @@ let fs = require("fs");
 const { AugurClient } = require("augurbot");
 const colors = require('colors');
 const cron = require('cron');
-const GlobalBlackList = require("../storage/GlobalBlacklist.json");
 let clientObj;
 
 const errorLog = new Discord.WebhookClient(config.devLogs.error.id, config.devLogs.error.token);
