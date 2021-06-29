@@ -122,23 +122,25 @@ const Utils = {
             return `https://discord.com/channels/${msg.guild.id}/${msg.channel.id}/${msg.id}`;
         }
     },
-    log: (msg, color) => {
-        let username = "";
+    log: async (msg, color, client) => {
+        if(client && !clientObj && client instanceof Discord.Client) clientObj = client;
         let commandName = "";
         let logger = "";
+        let embed = Utils.embed()
+        let embedColor; 
         const [hour, minute, second] = new Date().toLocaleTimeString("en-US").split(/:| /);
         if (msg instanceof Discord.Message) {
-            if (msg.author.nickname != null) {
-                username = msg.author.nickname;
-            }
-            else {
-                username = msg.author.username;
-            }
-            commandName = msg.cleanContent.substr(0, msg.content.indexOf(" "));
-            logger = (`${msg.client.username} | ${hour}:${minute}:${second}: `) + username + " called " + commandName + " \n> " + msg.cleanContent + "\n" + Utils.getMessageLink(msg);
+            embedColor = await msg.guild.members.cache.get(msg.client.user.id).displayHexColor;
+            commandName = Utils.parse(msg).command;
+            embed.setColor(embedColor)
+            .setAuthor(msg.member ? msg.member.displayName + " called " + commandName: msg.author.username + " called " + commandName, msg.author.displayAvatarURL())
+            .setFooter(`${msg.client.user.username}`);
+            logger =  msg.cleanContent;
             if (msg && msg.client && msg.client.config && msg.client.config.token && msg.client.config.devLogs && msg.client.config.devLogs.token) {
                 logger = logger.replace(msg.client.config.token, 'TOKEN-THAT-WAS-NEARLY-LEAKED').replace(msg.client.config.devLogs.token, 'WEBHOOK-TOKEN');
             }
+            embed.setDescription("```" + logger + "```\n") + Utils.getMessageLink(msg);
+            logger = `${msg.member ? msg.member.displayName : msg.author.username}` + " called " + commandName + " in:\n" + logger + "\n" + Utils.getMessageLink(msg);
             clientObj = msg.client;
         }
         else {
@@ -146,10 +148,19 @@ const Utils = {
             if (msg && msg.client && msg.client.config && msg.client.config.token && msg.client.config.devLogs && msg.client.config.devLogs.token) {
                 logger = logger.replace(msg.client.config.token, 'TOKEN-THAT-WAS-NEARLY-LEAKED').replace(msg.client.config.devLogs.token, 'WEBHOOK-TOKEN');
             }
+            embed.setColor(embedColor)
+            .setTitle(commandName)
+            .setDescription(logger);
+            if (clientObj){
+                let Chan = await clientObj.channels.fetch(config.devLogs.logChannel.id);
+                let BotGuildMember = await Chan.guild.members.fetch(clientObj.user.id)
+                let username = BotGuildMember.displayName;
+                embed.setAuthor(username, clientObj.user.displayAvatarURL())
+                .setFooter(`${clientObj.user.username}`);
+            }
         }
-        if (color) console.log(logger.color);
-        else console.log(logger);
-        if(clientObj) clientObj.channels.cache.get(config.devLogs.logChannel.id).send(logger);
+        console.log(logger);
+        if(clientObj) clientObj.channels.cache.get(config.devLogs.logChannel.id).send({embed});
         // eslint-disable-next-line no-undef
 
     },

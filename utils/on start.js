@@ -4,7 +4,7 @@ const colors = require('colors');
 
 let exporter = {
     onStart: async (client) => {
-        u.log('Ready!'.blue);
+        u.log('Ready!'.blue, client);
         u.updateScheduledEvents(client);
     }
 
