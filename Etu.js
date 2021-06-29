@@ -26,7 +26,7 @@ EtuClient.once('ready', () => {
 });
 EtuClient.login();
 // LAST DITCH ERROR HANDLING
-process.on("unhandledRejection", (error, p) => p.catch(e => u.errorHandler(e, "Unhandled Rejection")));
-process.on("uncaughtException", (error) => u.errorHandler(error, "Uncaught Exception"));
+process.on("unhandledRejection", (error, p) => p.catch(e => u.errorHandler(e, "Unhandled Rejection from Etu")));
+process.on("uncaughtException", (error) => u.errorHandler(error, "Uncaught Exception from Etu"));
 
 module.exports = EtuClient;

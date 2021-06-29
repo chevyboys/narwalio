@@ -27,7 +27,7 @@ client.once('ready', () => {
 
 client.login();
 // LAST DITCH ERROR HANDLING
-process.on("unhandledRejection", (error, p) => p.catch(e => u.errorHandler(e, "Unhandled Rejection")));
-process.on("uncaughtException", (error) => u.errorHandler(error, "Uncaught Exception"));
+process.on("unhandledRejection", (error, p) => p.catch(e => u.errorHandler(e, "Unhandled Rejection from Narwalio")));
+process.on("uncaughtException", (error) => u.errorHandler(error, "Uncaught Exception from Narwalio"));
 
 module.exports = client;
