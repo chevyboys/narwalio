@@ -149,7 +149,7 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
       if (message.channel.permissionsFor(user).has("MANAGE_MESSAGES") || message.channel.permissionsFor(user).has("ADMINISTRATOR") || message.channel.permissionsFor(user).has("MANAGE_WEBHOOKS")) {
         let messages = await message.channel.messages.fetchPinned().catch(u.noop);
         if (messages?.size == 50) return message.channel.send(`${user}, I was unable to pin the message since the channel pin limit has been reached.`).then(u.clean);
-        else message.pin();
+        else message.pin(`Requested by ${user.username}`);
       } else if (reaction.count == 1) {
         let embed = u.embed()
           .setTimestamp()
@@ -170,7 +170,7 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
         if (react.size == 1 && react.first().emoji.name == buttons[0]) {
           let messages = await message.channel.messages.fetchPinned().catch(u.noop);
           if (messages?.size == 50) return dialog.channel.send(`${user}, I was unable to pin the message since the channel pin limit has been reached.`).then(u.clean);
-          else message.pin();
+          else message.pin(`Requested by ${user.username}`);
           u.clean(dialog, 0);
         }
         else {
