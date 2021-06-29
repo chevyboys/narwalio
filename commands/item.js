@@ -7,17 +7,24 @@ const Module = new Augur.Module()
 
 async function grantWishes(roleID, oddsThatThingHappens = 0.3) {
   //determine if anyon gets
+  let guildID = "819031079758462998";
+  let guild;
+  try {
+    guild = await Module.client.guilds.fetch(guildID);
+  } catch (error) {
+    return;
+  }
   let ran = Math.random();
-  let guildID = "819031079104151573"
+
   let channelID = "819038025672687617";
   let channel = await Module.client.channels.fetch(channelID);
-  let guild = await Module.client.guilds.fetch(guildID);
+ 
   let role  = await guild.roles.cache.find((r) => (r.id == roleID));
   role.members.map(member => {
     if (ran >= oddsThatThingHappens) { return }
     let item = u.rand(items);
     member.roles.add(item.roleID);
-    channel.send(member.displayName + " has been given a " + item.emoji + "!");
+    channel.send(member.displayName + " has been given a " + item.emoji + " for being a member of " + role.name + "!");
   });
 
 }
@@ -161,6 +168,16 @@ Module.addCommand({
     } catch (e) { u.errorHandler(e, msg); }
     u.postCommand(msg);
   }
+}).addCommand({
+  name: "paintballfight",
+  description: "starts a paint ball fight",
+  process: async (msg, suffix) => {
+    if(!msg.guild.paintBallFight) msg.guild.paintBallFight = true;
+    else msg.guild.paintBallFight = false;
+    msg.react("🎨");
+
+  },
+  permissions:(msg) => (msg.member && (msg.member.permissions.has("MANAGE_GUILD") || msg.member.permissions.has("ADMINISTRATOR") || msg.client.config.adminId.includes(msg.author.id))),
 }).setClockwork(async () => {
   if(!Module.client.user.id == "854552593509253150") return;
   try {
