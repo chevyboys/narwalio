@@ -5,16 +5,16 @@ const Augur = require("augurbot"),
 
 const Module = new Augur.Module()
 
-async function grantWishes(roleID, oddsThatNothingHappens = 0.7) {
+async function grantWishes(roleID, oddsThatThingHappens = 0.3) {
   //determine if anyon gets
   let ran = Math.random();
   let guildID = "819031079104151573"
   let channelID = "819038025672687617";
-  let channel = Module.client.channels.cache.get(channelID);
-  let guild = await Module.client.guilds.cache.get(guildID);
-  let role  = guild.roles.cache.find((r) => (r.id == roleID));
+  let channel = await Module.client.channels.fetch(channelID);
+  let guild = await Module.client.guilds.fetch(guildID);
+  let role  = await guild.roles.cache.find((r) => (r.id == roleID));
   role.members.map(member => {
-    if (ran < oddsThatNothingHappens) { return }
+    if (ran >= oddsThatThingHappens) { return }
     let item = u.rand(items);
     member.roles.add(item.roleID);
     channel.send(member.displayName + " has been given a " + item.emoji + "!");
@@ -41,12 +41,14 @@ Module.addCommand({
         }
         else return member.roles.cache.has(i.roleID);
       })));
-
+      if(msg.guild.paintBallFight){
+        availableItems.push(items[3]);
+      }
       let itemRole;
       if (msg.mentions.roles.size > 0) {
         itemRole = msg.mentions.roles.first()
       } else itemRole = await msg.guild.roles.cache.find(element => (suffix.toLowerCase().trim()).indexOf(element.name.toLowerCase()) > -1 && availableItems.map(i => i.roleID).includes(element.id));
-
+      u.log(itemRole);
       if (!itemRole) {
         msg.reply("sorry, that's not an obtainable item on the server. Check `!inventory` to see what you can use.").then(u.clean);
         return;
@@ -122,16 +124,20 @@ Module.addCommand({
         }
         else return member.roles.cache.has(i.roleID);
       })));
+      if(msg.guild.paintBallFight){
+        availableItems.push(items[3]);
+      }
       let itemRole;
       if (msg.mentions.roles.size > 0) {
         itemRole = msg.mentions.roles.first()
       } else itemRole = await msg.guild.roles.cache.find(r => r.name.toLowerCase() == suffix.replace(/<+.*>\s*/gm, "").toLowerCase().trim());
       if (!itemRole) {
-        itemRole = items.some(i => { i.name.indexOf(suffix.replace(/<+.*>\s*/gm, "").toLowerCase().trim()) > -1 });
+        u.log(itemRole);
+        itemRole = items.some(i  => { i.name.indexOf(suffix.replace(/<+.*>\s*/gm, "").toLowerCase().trim()) > -1 });
         if (itemRole) itemRole = await msg.guild.roles.fetch(items.find(element => element.name.indexOf(suffix.replace(/<+.*>\s*/gm, "").toLowerCase().trim()) > -1).roleID);
-        else u.clean(msg);
+        else {u.clean(msg);
         msg.reply("sorry, that's not an obtainable item on the server. Check `!inventory` to see what you can use.").then(u.clean);
-        return;
+        return;}
       }
       let item = availableItems.find(i => i.roleID == itemRole.id);
       if (!item) {
@@ -156,24 +162,28 @@ Module.addCommand({
     u.postCommand(msg);
   }
 }).setClockwork(async () => {
+  if(!Module.client.user.id == "854552593509253150") return;
   try {
     // Every 12 hours Mr.genie club members have a 30% chance a random item.
-    return setInterval(grantWishes("819036592173219841", 0.7), 12 * 60 * 60 * 1000);
+    return setInterval(grantWishes("819036592173219841", 0.3/12), 1 * 60 * 60 * 1000);
   } catch (e) { u.errorHandler(e, "Item granting clockwork error, Genie Club"); }
 }).setClockwork(async () => {
+  if(!Module.client.user.id == "854552593509253150") return;
   try {
     // Every 24 hours Thornrose club members have a 10% get a random item.
-    return setInterval(() => grantWishes("819036460929384489", 0.9), 24 * 60 * 60 * 1000);
+    return setInterval(() => grantWishes("819036460929384489", 0.1/24), 1 * 60 * 60 * 1000);
   } catch (e) { u.errorHandler(e, "Item granting clockwork error, Thornrose Club"); }
 }).setClockwork(async () => {
+  if(!Module.client.user.id == "854552593509253150") return;
   try {
     // Every 24 hours Team members have a 50% get a random item.
-    return setInterval(() => grantWishes("849748196742004836", 0.5), 24 * 60 * 60 * 1000);
+    return setInterval(() => grantWishes("849748196742004836", 0.5/24), 1 * 60 * 60 * 1000);
   } catch (e) { u.errorHandler(e, "Item granting clockwork error, Team"); }
 }).setClockwork(async () => {
   try {
+    if(!Module || !Module.client || !Module.client.user || !Module.client.user.id == "854552593509253150") return;
     // Every 24 hours Nobility members have a 1% get a random item.
-    return setInterval(() => grantWishes("821557037539917865", 0.99), 24 * 60 * 60 * 1000);
+    return setInterval(() => grantWishes("821557037539917865", 0.01/24), 1 * 60 * 60 * 1000);
   } catch (e) { u.errorHandler(e, "Item granting clockwork error, Nobility"); }
 })
 module.exports = Module;
