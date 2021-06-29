@@ -5,13 +5,13 @@ const Augur = require("augurbot"),
 
 const Module = new Augur.Module()
 
-function grantWishes(roleID, oddsThatNothingHappens = 0.7) {
+async function grantWishes(roleID, oddsThatNothingHappens = 0.7) {
   //determine if anyon gets
   let ran = Math.random();
   let guildID = "819031079104151573"
   let channelID = "819038025672687617";
   let channel = Module.client.channels.cache.get(channelID);
-  let guild = Module.client.guilds.cache.get(guildID);
+  let guild = await Module.client.guilds.cache.get(guildID);
   let role  = guild.roles.cache.find((r) => (r.id == roleID));
   role.members.map(member => {
     if (ran < oddsThatNothingHappens) { return }
@@ -155,15 +155,25 @@ Module.addCommand({
     } catch (e) { u.errorHandler(e, msg); }
     u.postCommand(msg);
   }
-}).setClockwork(() => {
+}).setClockwork(async () => {
   try {
     // Every 12 hours Mr.genie club members have a 30% chance a random item.
     return setInterval(grantWishes("819036592173219841", 0.7), 12 * 60 * 60 * 1000);
   } catch (e) { u.errorHandler(e, "Item granting clockwork error, Genie Club"); }
-}).setClockwork(() => {
+}).setClockwork(async () => {
   try {
     // Every 24 hours Thornrose club members have a 10% get a random item.
     return setInterval(() => grantWishes("819036460929384489", 0.9), 24 * 60 * 60 * 1000);
   } catch (e) { u.errorHandler(e, "Item granting clockwork error, Thornrose Club"); }
-});
+}).setClockwork(async () => {
+  try {
+    // Every 24 hours Team members have a 50% get a random item.
+    return setInterval(() => grantWishes("849748196742004836", 0.5), 24 * 60 * 60 * 1000);
+  } catch (e) { u.errorHandler(e, "Item granting clockwork error, Team"); }
+}).setClockwork(async () => {
+  try {
+    // Every 24 hours Nobility members have a 1% get a random item.
+    return setInterval(() => grantWishes("821557037539917865", 0.99), 24 * 60 * 60 * 1000);
+  } catch (e) { u.errorHandler(e, "Item granting clockwork error, Nobility"); }
+})
 module.exports = Module;

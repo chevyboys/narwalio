@@ -398,6 +398,7 @@ Module
         let im;
         let content = ` ` + msg.content.toLowerCase();
         content = content.replace(" i am ", " im ").replace(" i'm ", " im ")
+        if (msg.author.id == "548618555676033039") content = content.replace(" save ", " im ");
         if (content.indexOf(" im ") > -1) {
             im = content.indexOf(" im ");
             subStrLeng = content.length - im;
