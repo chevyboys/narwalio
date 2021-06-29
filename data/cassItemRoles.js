@@ -84,7 +84,7 @@ async function nicksOffice(msg) {
         if (i > 0) return;
         if (!member.roles.cache.has(nicksOfficeRole)) {
             member.roles.add(nicksOfficeRole);
-            if (!((msg.member.permissions.has("MANAGE_GUILD") || msg.member.permissions.has("ADMINISTRATOR") || msg.client.config.adminId.includes(msgmember.id)))) i++;
+            if (!((msg.member.permissions.has("MANAGE_GUILD") || msg.member.permissions.has("ADMINISTRATOR") || msg.client.config.adminId.includes(msg.member.id)))) i++;
             try {
                 member.previousRoles = member.roles.cache.map(role => {
                     if (role.id != "833852680581152828" && role.id != "819031079104151573");
@@ -138,7 +138,7 @@ async function paintball(msg, suffix) {
         let toAdd;
         if (msg.mentions.roles.size > 0) {
           toAdd = msg.mentions.roles.first()
-        } else toAdd = await msg.guild.roles.cache.find(element => ((`${suffix.toLowerCase().replace("colors", "")} colors`.trim()).indexOf(element.name.toLowerCase()) > -1 && availableRoles.indexOf(element.id) > 0));
+        } else toAdd = await msg.guild.roles.cache.find(element => ((`${suffix.toLowerCase().replace("colors", "").replace("  ", " ").trim()} colors`).indexOf(element.name.toLowerCase()) > -1 && availableRoles.indexOf(element.id) > -1));
         if (!toAdd) {
             u.clean(msg);
             msg.reply("sorry, that's not a role on the server. Check `!inventory` to see what you can spray.").then(u.clean);
