@@ -6,6 +6,7 @@ let exporter = {
     onStart: async (client) => {
         u.log('Ready!'.blue, client);
         u.updateScheduledEvents(client);
+        u.initiateUtilsClient(client);
     }
 
 }

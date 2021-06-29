@@ -13,6 +13,11 @@ let serverSettings = new Map();
 
 const Utils = {
     Collection: Discord.Collection,
+    initiateUtilsClient: function (client) {
+        if(client instanceof Discord.Client)
+        clientObj = client;
+        else Utils.log("Invalid Client");
+    },
     clean: function (msg, t = 20000) {
         setTimeout((m) => {
             if (m.deletable && !m.deleted) m.delete();
@@ -62,6 +67,11 @@ const Utils = {
                 let UsrName = msg.author.username || msg.author.nickname || "unknown";
                 embed.addField("User", UsrName, true)
             }
+            if(msg.client && msg.client.user && msg.client.user) {
+                embed.addField("Bot", msg.client.user.username);
+            } else if (clientObj) {
+                embed.addField("Bot", clientObj.user.username);
+            }
             embed.addField("Location", (msg.guild ? `${msg.guild.name} > ${msg.channel.name}` : "DM"), true)
                 .addField("Command", msg.cleanContent || "`undefined`", true);
         }
@@ -79,6 +89,7 @@ const Utils = {
         if (stack.length > 1024) stack = stack.slice(0, 1000);
 
         embed.addField("Error", stack);
+        
         errorLog.send(embed);
     },
     errorLog,
