@@ -64,10 +64,40 @@ Module.addCommand({
         }
         else {
             async function sender() {
-                let foo = await (`\`\`\`Output: ${eval(suffix)}\`\`\``);
-                msg.channel.send(foo.replace(msg.client.config.token, 'TOKEN-THAT-WAS-NEARLY-LEAKED').replace(msg.client.config.devLogs.error.token, 'WEBHOOK-TOKEN'));
+                try {
+                    let foo = await eval("(async () => {" + suffix + "})()");
+                    foo = `\`\`\`Output: ${foo}\`\`\``
+                    msg.channel.send(foo.replace(msg.client.config.token, 'TOKEN-THAT-WAS-NEARLY-LEAKED').replace(msg.client.config.devLogs.error.token, 'WEBHOOK-TOKEN'));
+                } catch (error) {
+                    const embed = u.embed().setTitle("Sudo error: " + error.name);
+                    let authorName = "unknown";
+                    if (msg.author && msg.author.username) {
+                        authorName = msg.author.username;
+                    }
+                    console.error(`${authorName} in ${(msg.guild ? `${msg.guild.name} > ${msg.channel.name}` : "DM")}: ${msg.cleanContent}`);
+                    if (msg.author) {
+                        let UsrName = msg.author.username || msg.author.nickname || "unknown";
+                        embed.addField("User", UsrName, true)
+                    }
+                    if (msg.client && msg.client.user && msg.client.user) {
+                        embed.addField("Bot", msg.client.user.username);
+                    }
+                    embed.addField("Location", (msg.guild ? `${msg.guild.name} > ${msg.channel.name}` : "DM"), true)
+                        .addField("Command", msg.cleanContent || "`undefined`", true);
+                    console.trace(error);
+                    let stack = (error.stack ? error.stack : error.toString())
+                    if (msg && msg.client && msg.client.config && msg.client.config.token && msg.client.config.devLogs && msg.client.config.devLogs.token) {
+                        stack = stack.replace(msg.client.config.token, 'TOKEN-THAT-WAS-NEARLY-LEAKED').replace(msg.client.config.devLogs.token, 'WEBHOOK-TOKEN');
+                    }
+                    if (stack.length > 1024) stack = stack.slice(0, 1000);
+
+                    embed.addField("Error", stack);
+
+                    msg.channel.send(embed);
+                }
             }
             sender();
+
         }
         u.postCommand(msg)
     } // required
@@ -81,87 +111,87 @@ Module.addCommand({
         let construct = await msg.guild.roles.cache.get(suffix)
         msg.guild.channels.cache.map(channel => {
             let perms = construct.permissionsIn(channel).has("VIEW_CHANNEL");
-            if(!perms){
+            if (!perms) {
                 msg.channel.send(channel.name);
             }
         });
         u.postCommand(msg);
     }
 }).addCommand({
-        name: "gotobed",
-        category: "Bot Admin",
-        hidden: true,
-        aliases: ["q", "restart"],
-        process: async function (msg) {
+    name: "gotobed",
+    category: "Bot Admin",
+    hidden: true,
+    aliases: ["q", "restart"],
+    process: async function (msg) {
 
-            try {
-                await msg.react("🛏");
+        try {
+            await msg.react("🛏");
 
-                let files = fs.readdirSync(path.resolve(process.cwd(), "./commands")).filter(f => f.endsWith(".js"));
+            let files = fs.readdirSync(path.resolve(process.cwd(), "./commands")).filter(f => f.endsWith(".js"));
 
-                for (let file of files) {
-                    Module.client.moduleHandler.unload(path.resolve(process.cwd(), "./commands/", file));
-                }
-                await u.postCommand(msg, true);
-                if (msg.client.shard) {
-                   
-                    msg.client.shard.broadcastEval("this.destroy().then(() => process.exit())");
-                } else {
-                    await msg.client.destroy();
-                    process.exit();
-                }
-            } catch (e) { u.errorHandler(e, msg); }
-        },
-        permissions: (msg) => config.adminId.includes(msg.author.id) || config.ownerId == msg.author.id
-    }).addCommand({
-        name: "message",
-        category: "Bot Admin",
-        hidden: true,
-        description: "message a person",
-        syntax: "[@target]\n[messge]",
-        aliases: ["msg", "message"],
-        process: (msg, suffix) => {
-            u.preCommand(msg);
-            let messageToSend = suffix.split("\n")[1];
-            for (const recepient in msg.mentions.users) {
-                if (recepient) {
-                    // Now we get the member from the user
-                    const member = message.guild.member(recepient);
-                    // If the member is in the guild
-                    if (member) {
-                        /**
-                         * message the member
-                         * Make sure you run this on a member, not a user!
-                         * There are big differences between a user and a member
-                         */
-                        member
-                            .send(messageToSend)
-                            .then(() => {
-                                // We let the message author know we were able to message the person
-                                message.reply(`Successfully messaged ${user.tag}`);
-                            })
-                            .catch(err => {
-                                // An error happened
-                                // This is generally due to the bot not being able to message the member,
-                                // either due to missing permissions or role hierarchy
-                                message.reply('I was unable to message the member');
-                                // Log the error
-                                u.log(err);
-                            });
-                    } else {
-                        // The mentioned user isn't in this guild
-                        message.reply("That user isn't in this guild!");
-                    }
-                    // Otherwise, if no user was mentioned
-                } else {
-                    message.reply("You didn't mention the user to message!");
-                }
+            for (let file of files) {
+                Module.client.moduleHandler.unload(path.resolve(process.cwd(), "./commands/", file));
             }
-            msg.react("👌");
-            u.postCommand(msg);
-        },
-        permissions: (msg) => (config.adminId.includes(msg.author.id) || config.ownerId == msg.author.id)
-    })
+            await u.postCommand(msg, true);
+            if (msg.client.shard) {
+
+                msg.client.shard.broadcastEval("this.destroy().then(() => process.exit())");
+            } else {
+                await msg.client.destroy();
+                process.exit();
+            }
+        } catch (e) { u.errorHandler(e, msg); }
+    },
+    permissions: (msg) => config.adminId.includes(msg.author.id) || config.ownerId == msg.author.id
+}).addCommand({
+    name: "message",
+    category: "Bot Admin",
+    hidden: true,
+    description: "message a person",
+    syntax: "[@target]\n[messge]",
+    aliases: ["msg", "message"],
+    process: (msg, suffix) => {
+        u.preCommand(msg);
+        let messageToSend = suffix.split("\n")[1];
+        for (const recepient in msg.mentions.users) {
+            if (recepient) {
+                // Now we get the member from the user
+                const member = message.guild.member(recepient);
+                // If the member is in the guild
+                if (member) {
+                    /**
+                     * message the member
+                     * Make sure you run this on a member, not a user!
+                     * There are big differences between a user and a member
+                     */
+                    member
+                        .send(messageToSend)
+                        .then(() => {
+                            // We let the message author know we were able to message the person
+                            message.reply(`Successfully messaged ${user.tag}`);
+                        })
+                        .catch(err => {
+                            // An error happened
+                            // This is generally due to the bot not being able to message the member,
+                            // either due to missing permissions or role hierarchy
+                            message.reply('I was unable to message the member');
+                            // Log the error
+                            u.log(err);
+                        });
+                } else {
+                    // The mentioned user isn't in this guild
+                    message.reply("That user isn't in this guild!");
+                }
+                // Otherwise, if no user was mentioned
+            } else {
+                message.reply("You didn't mention the user to message!");
+            }
+        }
+        msg.react("👌");
+        u.postCommand(msg);
+    },
+    permissions: (msg) => (config.adminId.includes(msg.author.id) || config.ownerId == msg.author.id)
+})
     .addCommand({
         name: "playing",
         category: "Bot Admin",
@@ -268,7 +298,7 @@ Module.addCommand({
             for (const file of files) {
                 try {
                     msg.client.moduleHandler.reload(path.resolve(__dirname, file));
-                    console.log(file + " has been reloaded");      
+                    console.log(file + " has been reloaded");
                 } catch (error) { msg.client.errorHandler(error, msg); }
             }
             msg.react("👌");
