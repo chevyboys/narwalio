@@ -2,6 +2,7 @@ var mongoose = require('mongoose'),
     Schema = mongoose.Schema;
 
 var TagSchema = new Schema({
+    serverName: String,
     serverId: String,
     tag: String,
     response: String,

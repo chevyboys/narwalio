@@ -8,6 +8,7 @@ var UserSchema = new Schema({
         type: Boolean,
         default: false
     },
+    lastGoodMorning: String,
     birthday: String,
     XP: {
         type: Number,

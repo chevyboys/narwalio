@@ -3,7 +3,6 @@ const Augur = require("augurbot");
 const u = require("../utils/utils");
 const fetch = require("node-fetch");
 const colors = require('colors');
-const lastGoodMorningSent = new Discord.Collection();
 const fs = require('fs');
 
 
@@ -138,18 +137,21 @@ const Module = new Augur.Module()
             return returner;
         }
     }).addEvent("presenceUpdate", async (oldPresence, newPresence) => {
-        if (!newPresence.member.roles.cache.has('796965135054143488') && !newPresence.member.roles.cache.some(role => role.name === `Narwalio's Favorite`) && !newPresence.member.roles.cache.some(role => role.id == `843536251574943794`) ) { return };
+        if ((!newPresence.member.roles.cache.some(role => role.name === `Narwalio's Favorite`)) && !newPresence.member.roles.cache.some(role => role.id == `843536251574943794`)) { return };
         const now = new Date();
         const [hour, minute, second] = new Date().toLocaleTimeString("en-US", { hour: 'numeric', hour12: false }).split(/:| /);
         const day = now.getDay();
+        let lastGM = await Module.db.user.fetchUser(newPresence.member.user.id);
+        lastGM = lastGM.lastGoodMorning;
+        u.log(lastGM + " " + day);
         //if (oldPresence) console.log(`${lastGoodMorningSent.get(newPresence.member.user.id)}/${day}:${hour}:${minute}:${second}\nIs admin? ${Module.config.adminId.includes(newPresence.member.user.id)}\nPresence:${(oldPresence.status)}->${newPresence.status}`.green)
         //else console.log(`${lastGoodMorningSent.get(newPresence.member.user.id)}/${day}:${hour}:${minute}:${second}\nIs ${newPresence.member.nickname} admin? ${Module.config.adminId.includes(newPresence.member.user.id)}\nPresence: ??? ->${newPresence.status}`.green)
         if (
             ((hour > 3 && hour < 11) || Module.config.adminId.includes(newPresence.member.user.id)) &&
             (!oldPresence || !(oldPresence.status == "online" || oldPresence.status == "idle"))
             && (newPresence.status == "online" || newPresence.status == "idle")
-            && (!lastGoodMorningSent.has(newPresence.member.user.id) || lastGoodMorningSent.get(newPresence.member.user.id) != day)) {
-            newPresence.member.user.send(`Good Morning ${newPresence.member.nickname}!`);
+            && (lastGM == null) || lastGM != day) {
+            newPresence.member.user.send(`Good Morning ${newPresence.member.displayName}!`);
             let chn;
             if (!newPresence.member.user.DMChannel) {
                 chn = await newPresence.member.user.createDM();
@@ -174,7 +176,7 @@ const Module = new Augur.Module()
                     break;
             }
             loadCuties(fakeMsg, " ", subreddit, 100)
-            lastGoodMorningSent.set(newPresence.member.user.id, day);
+            await Module.db.user.update(newPresence.member.user, { lastGoodMorning: day })
 
         }
         /*if (newPresence.status == "online") { console.log(`Presence: ${newPresence.guild.name}: ${newPresence.member.nickname || newPresence.user.name} is now ${newPresence.status}`.green); }
@@ -184,7 +186,7 @@ const Module = new Augur.Module()
 */
 
     });
-Module.setUnload(function() {
+Module.setUnload(function () {
     const data = JSON.stringify(lastGoodMorningSent, null, 4);
     fs.writeFileSync('./storage/LastGoodMorningSent.json', data);
 });

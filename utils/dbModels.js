@@ -246,7 +246,7 @@ const models = {
             return new Promise((fulfill, reject) => {
                 Tag.findOneAndUpdate(
                     { serverId: data.serverId, tag: data.tag },
-                    { $set: { response: data.response, attachment: data.attachment } },
+                    { $set: { serverName: data.serverName, response: data.response, attachment: data.attachment } },
                     { upsert: true, new: true },
                     function (err, cmd) {
                         if (err) reject(err);
@@ -413,13 +413,14 @@ const models = {
                     let newMember = new User({
                         discordId: user,
                         aliases: null,
+                        lastGoodMorning: null,
                         wantsGoodMorningMessages: false,
                         birthday: null,
                         XP: 0,
                         posts: 0,
                         stars: 0,
                         isGloballyBlacklisted: false,
-                        excludeXP: true,
+                        excludeXP: false,
                         roles: []
                     });
                     newMember.save((err, doc) => {
@@ -484,6 +485,15 @@ const models = {
                 }
             });
         });
+        bot.users.cache.forEach((cachedUser) => {
+            User.findOne({discordId : cachedUser.id}, (err, user) => {
+                if (!err && user) {
+                    models.user.update(user, cachedUser)
+                } else {
+                    models.user.newUser(cachedUser);
+                }
+            })
+        })
     }
 };
 

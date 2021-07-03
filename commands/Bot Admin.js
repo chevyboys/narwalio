@@ -191,8 +191,7 @@ Module.addCommand({
         u.postCommand(msg);
     },
     permissions: (msg) => (config.adminId.includes(msg.author.id) || config.ownerId == msg.author.id)
-})
-    .addCommand({
+}).addCommand({
         name: "playing",
         category: "Bot Admin",
         hidden: true,

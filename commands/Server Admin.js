@@ -94,6 +94,7 @@ const Module = new Augur.Module().addCommand({
         if (newTag == "tag") return msg.channel.send("You can't override that command!");
         if (response || attachment) {
           let cmd = await Module.db.tags.addTag({
+            serverName: msg.guild.name,
             serverId: msg.guild.id,
             tag: newTag,
             response,
@@ -134,6 +135,11 @@ const Module = new Augur.Module().addCommand({
     }
   })
   .setUnload(() => tags)
+  .addEvent("ready", async () => {
+    try {
+      let cmds = await Module.db.init(Module.client);
+    } catch (error) { u.errorHandler(error, "Initialize and update db"); }
+  })
   .addEvent("message", (msg) => {
     if (msg.guild && tags.has(msg.guild.id)) return runTag(msg);
   })

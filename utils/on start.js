@@ -1,5 +1,7 @@
-u = require('./utils');
+const u = require('./utils');
 const colors = require('colors');
+const Augur = require("augurbot");
+const Module = new Augur.Module();
 
 
 let exporter = {
