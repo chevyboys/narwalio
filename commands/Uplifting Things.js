@@ -143,7 +143,6 @@ const Module = new Augur.Module()
         const day = now.getDay();
         let lastGM = await Module.db.user.fetchUser(newPresence.member.user.id);
         lastGM = lastGM.lastGoodMorning;
-        u.log(lastGM + " " + day);
         //if (oldPresence) console.log(`${lastGoodMorningSent.get(newPresence.member.user.id)}/${day}:${hour}:${minute}:${second}\nIs admin? ${Module.config.adminId.includes(newPresence.member.user.id)}\nPresence:${(oldPresence.status)}->${newPresence.status}`.green)
         //else console.log(`${lastGoodMorningSent.get(newPresence.member.user.id)}/${day}:${hour}:${minute}:${second}\nIs ${newPresence.member.nickname} admin? ${Module.config.adminId.includes(newPresence.member.user.id)}\nPresence: ??? ->${newPresence.status}`.green)
         if (
@@ -186,8 +185,4 @@ const Module = new Augur.Module()
 */
 
     });
-Module.setUnload(function () {
-    const data = JSON.stringify(lastGoodMorningSent, null, 4);
-    fs.writeFileSync('./storage/LastGoodMorningSent.json', data);
-});
 module.exports = Module;

@@ -1,10 +1,9 @@
 /* This category is for commands useable by everyone that give information about the bot or specifically aid in the bots ability to be run on the server.
 */ 
-const Augur = require("augurbot");
-const chars = require("../utils/emojiCharacters");
-const config = require('../config/config.json');
 const fs = require('fs');
-moment = require("moment");
+const Augur = require("augurbot");
+const u = require("../utils/utils");
+const moment = require("moment");
 
 const Module = new Augur.Module()
     .addCommand({
@@ -208,7 +207,7 @@ const Module = new Augur.Module()
         } // required
     }).addCommand({
         name: "invite", // required
-        description: "Generates the invite link for narwalio, so you can invite him to a server", // recommended
+        description: "Generates the invite link for "+ "the bot" + ", so you can invite him to a server", // recommended
         info: "", // recommended
         hidden: false, // optional
         category: "Bot Meta", // optional
@@ -216,7 +215,7 @@ const Module = new Augur.Module()
         permissions: (msg) => true, // optional
         process: (msg) => {
             u.preCommand(msg);
-            let holyMessage = `https://discord.com/oauth2/authorize?client_id=637030744610439176&permissions=8&scope=bot`;
+            let holyMessage = `https://discord.com/oauth2/authorize?client_id=${Module.client.user.id}&permissions=8&scope=bot`;
             msg.channel.send(holyMessage);
             u.postCommand(msg);
         } // required

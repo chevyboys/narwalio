@@ -4,6 +4,9 @@ const Augur = require("augurbot"),
   const Module = new Augur.Module()
 
 async function celebrate() {
+  if (Module.client.user.id != "854552593509253150"){
+    return;
+  }
   let guild = await Module.client.guilds.cache.get("819031079104151573")
   if (moment().hours() == 15) {
     testBirthdays(guild).catch(error => u.errorHandler(error, "Test Birthdays"));
@@ -111,7 +114,7 @@ Module.addCommand({
     } catch (e) { u.errorHandler(e, "Birthday Clockwork Error"); }
   }).addCommand({
     name: "birthday",
-    description: "Let us know when to celebrat you",
+    description: "Let us know when to celebrate you",
     syntax: "Month/Day", hidden: true,
     process: async (msg, suffix) => {
       u.preCommand(msg);
