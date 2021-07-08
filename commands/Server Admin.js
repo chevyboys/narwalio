@@ -128,6 +128,11 @@ const Module = new Augur.Module().addCommand({
         tags.get(cmd.serverId).set(cmd.tag, cmd);
       }
     } catch (error) { u.errorHandler(error, "Load Custom Tags"); }
+
+
+    try {
+      await dModule.db.init(Module.client);
+    } catch (error) { u.errorHandler(error, "Initialize and update db"); }
   })
   .setInit(data => {
     if (data) {
@@ -135,11 +140,6 @@ const Module = new Augur.Module().addCommand({
     }
   })
   .setUnload(() => tags)
-  .addEvent("ready", async () => {
-    try {
-      let cmds = await Module.db.init(Module.client);
-    } catch (error) { u.errorHandler(error, "Initialize and update db"); }
-  })
   .addEvent("message", (msg) => {
     if (msg.guild && tags.has(msg.guild.id)) return runTag(msg);
   })
