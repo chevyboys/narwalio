@@ -1,5 +1,4 @@
 const Augur = require("augurbot");
-const { preCommand } = require("../utils/utils");
 const u = require('../utils/utils');
 const Module = new Augur.Module();
 
@@ -10,27 +9,34 @@ async function nicksOffice(msg) {
     } else if (msg.guild.id == "639630243111501834") {
         nicksOfficeRole = msg.guild.roles.cache.get("796590326529261588");
     }
-
-    msg.mentions.members.forEach(member => {
-        if (!member.roles.cache.has(nicksOfficeRole)) {
-            member.roles.add(nicksOfficeRole);
+    //member.previousRoles is roles they used to have
+    let banishment = async (targetMember) => {
+        if (!targetMember.roles.cache.has(nicksOfficeRole)) {
             try {
-                member.previousRoles = member.roles.cache.map(role => {
-                    if (role.id != "833852680581152828" && role.id != "819031079104151573");
-                    {
-                        try {
-                            member.roles.remove(role.id);
-                            return role.id;
-                        } catch (error) {
-                            u.log("could not remove: " + role.id);
-                        }
+                if (!targetMember.manageable) return;
+                let managedRoles = [];
+                let banishedNewRoles = [];
+                banishedNewRoles.push(nicksOfficeRole)
+                targetMember.previousRoles = targetMember.roles.cache.map(role => {
+                    if (role.managed) {
+                        managedRoles.push(role.id)
+                        banishedNewRoles.push(role.id)
                     }
-
+                    return role.id;
                 });
+                targetMember.roles.set(banishedNewRoles)
             } catch (error) {
                 u.log(error);
             }
         }
+    }
+    if (msg.mentions.everyone) {
+        for (targetMember in msg.channel.members.cache) {
+            if (targetMember.manageable && !targetMember.user.bot) await banishment(targetMember);
+        };
+    }
+    else msg.mentions.members.forEach(targetMember => {
+        if (targetMember.manageable) banishment(targetMember);
     });
 }
 async function nicksOfficeRestore(msg) {
@@ -40,16 +46,19 @@ async function nicksOfficeRestore(msg) {
     } else if (msg.guild.id == "639630243111501834") {
         nicksOfficeRole = msg.guild.roles.cache.get("796590326529261588");
     }
-    if (msg.mentions) msg.mentions.members.forEach(member => {
+    if (msg.mentions.everyone) {
+        for (targetMember in msg.channel.members.cache) {
+            if (targetMember.manageable && !targetMember.user.bot) await targetMember.roles.set(targetMember.previousRoles);
+            targetMember.previousRoles = null;
+        };
+    }
+    else if (msg.mentions) msg.mentions.members.forEach(member => {
         try {
-            member.previousRoles.forEach(element => {
-                member.roles.add(element);
-            });
+            member.roles.set(member.previousRoles);
         } catch (error) {
             u.log(error);
         }
         member.previousRoles = null;
-        member.roles.remove(nicksOfficeRole);
     });
 }
 async function silence(msg) {
@@ -77,11 +86,7 @@ async function silenceRestore(msg) {
         member.roles.remove(silenceRole);
     });
 }
-async function dadJokeRestore(msg) {
-    if (!msg.member.previousNick) return;
-    await msg.member.setNickname(msg.member.previousNick, "Restoring order");
-    msg.member.previousNick = null;
-}
+
 
 Module
     .addCommand({
@@ -97,7 +102,7 @@ Module
         process: (msg) => {
             u.preCommand(msg);
             if (!msg.mentions.users.size) {
-                return msg.channel.send(`${msg.author.displayAvatarURL({ format: "png", dynamic: true })}`);
+                return msg.channel.send(`${msg.author.displayAvatarURL({ format: "png", dynamic: true, size: 512 })}`);
             }
             const avatarList = msg.mentions.users.map(user => {
                 return `${user.displayAvatarURL({ format: "png", dynamic: true })}`;
@@ -341,7 +346,7 @@ Module
         process: async (msg, suffix) => {
             u.preCommand(msg);
             let amount = !!parseInt(suffix.split(' ')[1]) ? parseInt(suffix.split(' ')[1]) : parseInt(suffix.split(' ')[2]) || 10;
-            if (!msg.mentions.users.size) {
+            if (!msg.mentions.users.size && !msg.mentions.everyone) {
                 return msg.channel.send(`You need to tell me who you would like banish`);
             }
             await nicksOffice(msg);
@@ -388,56 +393,5 @@ Module
             }, amount * 60000, msg);
             u.postCommand(msg);
         }, // required
-    }).addEvent("message", (msg) => {
-        const amount = 600;
-        if (msg.author.bot) { return }
-        if(msg.member && !msg.member.manageable) {return};
-        var ran = Math.random();
-        var oddsThatNothingHappens = 0.95;
-        if (ran < oddsThatNothingHappens && !(msg.author.id == "548618555676033039")) { return }
-        let im;
-        let content = ` ` + msg.content.toLowerCase();
-        content = content.replace(" i am ", " im ").replace(" i'm ", " im ")
-        if (msg.author.id == "548618555676033039") content = content.replace(" save ", " im ");
-        if (content.indexOf(" im ") > -1) {
-            im = content.indexOf(" im ");
-            subStrLeng = content.length - im;
-            if (msg.member.roles.cache.has("857772273389666324") || (msg.member.roles.cache.some(r => r.name.toLowerCase() === "🛡"))) {
-                msg.react("🛡");
-                return;
-            }
-            if (subStrLeng > 23) subStrLeng = 23;
-            if (msg.author.id == "548618555676033039") {
-                if (subStrLeng > 21) subStrLeng = 21;
-            }
-            let dadJokeName = content.substr(im + 3, subStrLeng);
-            dadJokeName = dadJokeName.charAt(1).toUpperCase() + dadJokeName.substr(2, dadJokeName.length);
-            if (msg.author.id == "548618555676033039") {   
-                dadJokeName = `▲${dadJokeName}▲`;
-            }
-            if (msg.member.roles.cache.has("819031079298138187")){
-                dadJokeName = `${dadJokeName} | Admin`;
-            } else if (msg.member.roles.cache.has("819035372390449193")){
-                dadJokeName = `${dadJokeName} | Mod`;
-            } else if (msg.member.roles.cache.has("849748022786129961")){
-                dadJokeName = `${dadJokeName} | Team`;
-            }
-            try {
-                msg.channel.startTyping();
-                if (!msg.member.previousNick) {
-                    msg.member.previousNick = msg.member.displayName;
-                }
-                msg.member.setNickname(dadJokeName, "For the memes");
-                u.log("Hi " + dadJokeName + " I'm Dad!");
-                u.clean(msg.channel.send("Hi \"" + dadJokeName + "\" I'm Dad!"));
-                setTimeout(async (m) => {
-                    msg.channel.stopTyping();
-                    await dadJokeRestore(msg);
-
-                }, amount * 1000, msg);
-            } catch (error) {
-                u.log(error);
-            }
-        }
-    })
+    });
 module.exports = Module;

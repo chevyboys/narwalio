@@ -1,6 +1,7 @@
 const Augur = require("augurbot");
 const u = require('../utils/utils');
 const Module = new Augur.Module();
+const birbCursedRole = "867524884350238780"
 
 let baseroles = ["821550399068438589",
     "821550724331995147",
@@ -70,7 +71,6 @@ Module
         }
 
         if (isStaff && (newMember.displayName.indexOf(postFix) < 0 || newMember.displayName.match(/\|/gm).length > 1 || !newMember.displayName.endsWith(postFix))) {
-            console.log("changing staff name");
             let newNick;
             if (newMember.displayName.indexOf("|") > -1) {
                 newNick = newMember.displayName.substr(0, newMember.displayName.indexOf("|"));
