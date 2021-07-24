@@ -1,7 +1,9 @@
 const Augur = require("augurbot"),
   inventory = require("../utils/roleColors"),
   u = require("../utils/utils"),
+  {ItemUtils} = require("../utils/ItemUtils")
   items = require('../data/cassItemRoles');
+
 
 const roles = new Map();
 
@@ -21,8 +23,6 @@ const Module = new Augur.Module()
         }
         else member = await msg.guild.members.fetch(msg.author.id);
         let availableRoles = [].concat(...(inventory.filter((v, k) => member.roles.cache.has(k)).array()));
-        let role = msg.guild.roles.cache.find(r => r.name.toLowerCase() == suffix.toLowerCase().replace(" colors", "").replace(" seasonal", "").trim());
-
         let toAdd = msg.guild.roles.cache.find(r => r.name.toLowerCase() == `${suffix.toLowerCase().replace(" colors", "")} colors`);
         if (!toAdd) {
           u.clean(msg);
@@ -68,27 +68,19 @@ const Module = new Augur.Module()
           member = await msg.guild.members.fetch(msg.mentions.users.last().id);
         }
         else member = await msg.guild.members.fetch(msg.author.id);
+        let availableItems = await ItemUtils.getMemberItems(member);
         let availableRoles = [].concat(...(inventory.filter((v, k) => member.roles.cache.has(k)).array()));
         let embed = u.embed().setAuthor(member.displayName, member.user.displayAvatarURL({ size: 32 }))
           .setTitle("Equippable Color Inventory")
-          .setDescription(`Equip a color role with \`${Module.config.prefix}equip Role Name\`\ne.g. \`${Module.config.prefix}equip serf\`\n\n<@&${availableRoles.join(">\n<@&")}>`);
+          .setColor(msg.guild ? msg.guild.members.cache.get(msg.client.user.id).displayHexColor : "000000")
+          .setDescription(`Equip a color role with \`${Module.config.prefix}equip Role Name\`\ne.g. \`${Module.config.prefix}equip serf ${(availableRoles.length > 0) ? `\`\n\n<@&${availableRoles.join(">\n<@&")}>` : `\`\`\`404: cool roles not found. Try talking some more\`\`\``}`);
         if (msg.guild.id == "819031079104151573") {
           //cass items
-          let availableItems = [].concat(...(items.filter(i => {
-            if (msg.member && (msg.member.permissions.has("MANAGE_GUILD") || msg.member.permissions.has("ADMINISTRATOR") || msg.client.config.adminId.includes(msg.author.id))) {
-              return true;
-            }
-            else return member.roles.cache.has(i.roleID);
-          })));
           if (availableItems.length > 0) {
             embed.addField("Current items:", `Use an item with \`${Module.config.prefix}use [Item Icon]\`\ne.g. \`${Module.config.prefix}use 🔨 \`\n\n<@&${availableItems.map(i => i.roleID).join(">\n<@&")}>`)
           }
         }
-        if (availableRoles.length == 0) {
-          msg.channel.send(`${msg.author}, you don't have any colors in your inventory!`);
-        } else {
           msg.channel.send({ embed, disableMentions: "all" });
-        }
       } catch (error) { u.errorHandler(error, msg); }
       u.postCommand(msg);
     }

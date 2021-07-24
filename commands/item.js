@@ -1,206 +1,156 @@
-const Augur = require("augurbot"),
-  inventory = require("../utils/roleColors"),
-  u = require("../utils/utils"),
-  items = require('../data/cassItemRoles');
-
-const Module = new Augur.Module()
-
-async function grantWishes(roleID, oddsThatThingHappens = 0.3) {
-  //determine if anyon gets
-  let guildID = "819031079758462998";
-  let guild;
-  try {
-    guild = await Module.client.guilds.fetch(guildID);
-  } catch (error) {
-    return;
-  }
-  let ran = Math.random();
-
-  let channelID = "819038025672687617";
-  let channel = await Module.client.channels.fetch(channelID);
- 
-  let role  = await guild.roles.cache.find((r) => (r.id == roleID));
-  role.members.map(member => {
-    if (ran >= oddsThatThingHappens) { return }
-    let item = u.rand(items);
-    member.roles.add(item.roleID);
-    channel.send(member.displayName + " has been given a " + item.emoji + " for being a member of " + role.name + "!");
-  });
-
-}
-
+const u = require("../utils/utils");
+const { ItemUtils, Item } = require("../utils/ItemUtils");
+const Augur = require("augurbot");
+const Module = new Augur.Module(),
+  inventory = require("../utils/roleColors");
+const cassItems = require("../data/CassItems");
 
 Module.addCommand({
-  name: "use",
-  aliases: ["empower"],
-  description: "use an item from your inventory.",
-  process: async (msg, suffix, params) => {
-    u.preCommand(msg);
-    let empowered = false;
-    if(msg.content.indexOf("empower") > -1 && !suffix.indexOf("empower") > -1 && (msg.member.permissions.has("MANAGE_GUILD") || msg.member.permissions.has("ADMINISTRATOR") || msg.client.config.adminId.includes(msg.author.id))) {
-      empowered = true;
+    name: "use",
+    aliases: ["empower"],
+    description: "use an item from your inventory.",
+    usage: "<item> <user target> <role>",
+    process: async (msg, suffix) => {
+
+      let itemOptions = {};
+      //determine which item to use. If the user doesn't have the item, return    
+      //u.log("item parsing from suffix: " + suffix)
+      let memberItems = await ItemUtils.getMemberItems(msg.member);
+      let item = memberItems.find(i => (suffix.indexOf(i.emoji) > -1
+        || suffix.indexOf(i.name) > -1
+        || suffix.indexOf(i.roleID) > -1)
+      );
+      if (!item || item == {}) {
+        return msg.channel.send("You need to give me a valid item to !use");
+      }
+      //u.log(JSON.stringify(item));
+      item = await ItemUtils.resolveItem(item);
+      msg.content = msg.content.replace(item.emoji, "").replace(item.name, "").replace(item.roleID, "").replace(/ + +/gm, " ");
+      suffix = suffix.replace(item.emoji, "").replace(item.name, "").replace(item.roleID, "").replace(/ + +/gm, " ");
+
+      //determine if the use is empowered
+      if (msg.content.indexOf("empower") > -1 && msg.content.indexOf("empower") < msg.content.indexOf(suffix)) {
+        if (ItemUtils.hasInfiniteItems(msg.member)) {
+          itemOptions.empowered = true;
+        } else {
+          u.clean(msg.reply("You can't empower that item. try !use instead."))
+          return;
+        }
+      }
+      //determine target member
+      if (item.requiresTarget) {
+        itemOptions.targetMember = msg.mentions.members.first();
+      }
+      //determine target role if required, must be a role the person has or can equip other than an item.
+      if (item.requiresTargetRole) {
+        let serverRoles = msg.guild.roles.cache
+        let availableRoles = [].concat(...(serverRoles).array());
+        let targetRole = availableRoles.find(r => suffix.toLowerCase().indexOf(r.name.toLowerCase()) > -1 || suffix.indexOf(r.id) > - 1)
+        if (!targetRole) return msg.channel.send("You need to provide a role for this item to use");
+        itemOptions.targetRole = targetRole;
+      }
+      //determine if the item is free for all
+
+      //use the item
+      ItemUtils.use(msg, item, itemOptions);
+
     }
-    try {
-      let member = await msg.guild.members.fetch(msg.author.id);
-      let availableItems = [].concat(...(items.filter(i => {
-        if (msg.member && (msg.member.permissions.has("MANAGE_GUILD") || msg.member.permissions.has("ADMINISTRATOR") || msg.client.config.adminId.includes(msg.author.id))) {
-          return true;
+  }).addCommand({
+    name: "item",
+    description: "gets information about an item",
+    process: async (msg, suffix) => {
+      u.preCommand(msg);
+      try {
+        let member;
+        if (msg.mentions.users.size && ItemUtils.hasInfiniteItems(msg.member)) {
+          member = await msg.guild.members.fetch(msg.mentions.users.first().id);
+          suffix = suffix.replace(/<+.*>\s*/gm, "");
+        } else member = msg.member;
+
+        //get the item they want
+        let memberItems = await ItemUtils.getMemberItems(msg.member);
+        let item = memberItems.find(i => (suffix.indexOf(i.emoji) > -1
+          || suffix.indexOf(i.name) > -1
+          || suffix.indexOf(i.roleID) > -1)
+        );
+        if (!item || item == {}) {
+          return msg.channel.send("You need to give me a valid item to get information about");
+        } else {
+
+          // The role exists, the member has it, and it's usable
+          let embed = u.embed().setAuthor(member.displayName, member.user.displayAvatarURL({ size: 32 }))
+            .setTitle(item.name)
+            .setColor(msg.guild ? msg.guild.members.cache.get(msg.client.user.id).displayHexColor : "000000")
+            .setDescription(`${item.emoji} - ${item.description}`);
+          if (item.consumable) {
+            embed.addField(`Consumable`, "This item has limited uses")
+          }
+          if (item.passive) {
+            embed.addField(`Passive`, "This item is always active");
+          }
+          if (item.freeForAll) {
+            embed.addField(`Free for all`, "anyone can use this item unlimited times right now!");
+          }
+          msg.channel.send({ embed, disableMentions: "all" })
+          msg.react("👌");
         }
-        else return member.roles.cache.has(i.roleID);
-      })));
-      if(msg.guild.paintBallFight){
-        availableItems.push(items[3]);
-      }
-      let itemRole;
-      if (msg.mentions.roles.size > 0) {
-        itemRole = msg.mentions.roles.first()
-      } else itemRole = await msg.guild.roles.cache.find(element => (suffix.toLowerCase().trim()).indexOf(element.name.toLowerCase()) > -1 && availableItems.map(i => i.roleID).includes(element.id));
-      u.log(itemRole);
-      if (!itemRole) {
-        msg.reply("sorry, that's not an obtainable item on the server. Check `!inventory` to see what you can use.").then(u.clean);
-        return;
-      }
-      let item = availableItems.find(i => i.roleID == itemRole.id);
-      u.log(item);
-      if (!item) {
-        u.clean(msg);
-        msg.reply("sorry, that item isn't useable in your inventory. Check `!inventory` to see what items you can use.").then(u.clean);
-      } else {
-        // The role exists, the member has it, and it's usable
-        item.use(msg, member, empowered);
-        msg.react("👌");
-      }
-    } catch (e) { u.errorHandler(e, msg); }
-    u.postCommand(msg);
-  }
-}).addCommand({
-  name: "give",
-  description: "give an item to someone",
-  process: async (msg, suffix) => {
-    u.preCommand(msg);
-    try {
-      let member = await msg.guild.members.fetch(msg.author.id);
-      let availableItems = [].concat(...(items.filter(i => {
-        if (msg.member && (msg.member.permissions.has("MANAGE_GUILD") || msg.member.permissions.has("ADMINISTRATOR") || msg.client.config.adminId.includes(msg.author.id))) {
-          return true;
-        }
-        else return member.roles.cache.has(i.roleID);
-      })));
-      let itemRole = msg.mentions.roles.first() || await msg.guild.roles.cache.find(r => r.name.toLowerCase() == suffix.replace(/<+.*>\s*/gm, "").toLowerCase().trim());
-      let item = availableItems.find(i => i.roleID == itemRole.id);
-      if (!itemRole) {
-        u.clean(msg);
-        msg.reply("sorry, that's not an obtainable item on the server. Check `!inventory` to see what you can use.").then(u.clean);
-      } else if (!item) {
-        u.clean(msg);
-        msg.reply("sorry, that item isn't useable in your inventory. Check `!inventory` to see what items you can use.").then(u.clean);
-      } else {
-        // The role exists, the member has it, and it's usable
-        if (msg.member && (msg.member.permissions.has("MANAGE_GUILD") || msg.member.permissions.has("ADMINISTRATOR") || msg.client.config.adminId.includes(msg.author.id))) {
-          msg.mentions.members.forEach(member => {
-            if (!member.roles.cache.has(itemRole.id)) { member.roles.add(itemRole); }
-            else {
-              msg.reply(`${member.displayName} already has that role`);
+      } catch (e) { u.errorHandler(e, msg); }
+      u.postCommand(msg);
+    }
+  }).addCommand({
+    name: "give",
+    description: "give an item to someone",
+    process: async (msg, suffix) => {
+      u.preCommand(msg);
+      try {
+        //get the item they want
+        let item = (await ItemUtils.getMemberItems(msg.member)).find(i => (suffix.indexOf(i.emoji) > -1
+          || suffix.indexOf(i.name) > -1
+          || suffix.indexOf(i.roleID) > -1)
+        );
+        if (!item || item == {}) {
+          return msg.channel.send("You need to give me a valid item to give");
+        } else {
+          // The role exists, the member has it, and it's usable
+          let infinite = await ItemUtils.hasInfiniteItems(msg.member);
+          if (infinite) {
+            let members = await msg.mentions.members
+            for (member in members) {
+              let guildMember = await msg.guild.members.cache.get(member.value.id)
+              u.log(JSON.stringify(member));
+              let targetHasItem = await ItemUtils.getMemberItems(guildMember);
+              if (!targetHasItem.some(item)) { 
+                await guildMember.roles.add(item.roleID);
+                msg.channel.send(`Gave ${item.name} to  ${guildMember.displayName}`);
+              }
+              else {
+                msg.reply(`${member.displayName} already has that role`);
+              }
             }
-          })
-        }
-        else {
-          if (!msg.mentions.members.first().roles.cache.has(itemRole.id)) {
-            await msg.member.roles.remove(itemRole);
-            await msg.mentions.members.first().roles.add(itemRole);
           }
           else {
-            msg.reply(`${msg.mentions.members.first().displayName} already has that role`);
+            let targetHasItem = await ItemUtils.getMemberItems(msg.mentions.members.first());
+            if (!targetHasItem.some(item)) {
+              await msg.member.roles.remove(item.roleID);
+              await msg.mentions.members.first().roles.add(item.roleID);
+              msg.react("👌");
+            }
+            else {
+              msg.reply(`${msg.mentions.members.first().displayName} already has that item`);
+            }
           }
         }
-        msg.react("👌");
-      }
-    } catch (e) { u.errorHandler(e, msg); }
-    u.postCommand(msg);
-  }
-}).addCommand({
-  name: "item",
-  description: "gets information about an item",
-  process: async (msg, suffix) => {
-    u.preCommand(msg);
-    try {
-      let member = await msg.guild.members.fetch(msg.author.id);
-      let availableItems = [].concat(...(items.filter(i => {
-        if (msg.member && (msg.member.permissions.has("MANAGE_GUILD") || msg.member.permissions.has("ADMINISTRATOR") || msg.client.config.adminId.includes(msg.author.id))) {
-          return true;
-        }
-        else return member.roles.cache.has(i.roleID);
-      })));
-      if(msg.guild.paintBallFight){
-        availableItems.push(items[3]);
-      }
-      let itemRole;
-      if (msg.mentions.roles.size > 0) {
-        itemRole = msg.mentions.roles.first()
-      } else itemRole = await msg.guild.roles.cache.find(r => r.name.toLowerCase() == suffix.replace(/<+.*>\s*/gm, "").toLowerCase().trim());
-      if (!itemRole) {
-        u.log(itemRole);
-        itemRole = items.some(i  => { i.name.indexOf(suffix.replace(/<+.*>\s*/gm, "").toLowerCase().trim()) > -1 });
-        if (itemRole) itemRole = await msg.guild.roles.fetch(items.find(element => element.name.indexOf(suffix.replace(/<+.*>\s*/gm, "").toLowerCase().trim()) > -1).roleID);
-        else {u.clean(msg);
-        msg.reply("sorry, that's not an obtainable item on the server. Check `!inventory` to see what you can use.").then(u.clean);
-        return;}
-      }
-      let item = availableItems.find(i => i.roleID == itemRole.id);
-      if (!item) {
-        u.clean(msg);
-        msg.reply("sorry, that item isn't useable in your inventory. Check `!inventory` to see what items you can use.").then(u.clean);
-      } else {
-
-        // The role exists, the member has it, and it's usable
-        let embed = u.embed().setAuthor(member.displayName, member.user.displayAvatarURL({ size: 32 }))
-          .setTitle(item.name)
-          .setDescription(`${item.emoji} - ${item.description}`);
-        if (item.consumable) {
-          embed.addField(`Consumable`, "This item has limited uses")
-        }
-        if (item.passive) {
-          embed.addField(`Passive`, "This item is always active");
-        }
-        msg.channel.send({ embed, disableMentions: "all" })
-        msg.react("👌");
-      }
-    } catch (e) { u.errorHandler(e, msg); }
-    u.postCommand(msg);
-  }
-}).addCommand({
-  name: "paintballfight",
-  description: "starts a paint ball fight",
-  process: async (msg, suffix) => {
-    if(!msg.guild.paintBallFight) msg.guild.paintBallFight = true;
-    else msg.guild.paintBallFight = false;
-    msg.react("🎨");
-
-  },
-  permissions:(msg) => (msg.member && (msg.member.permissions.has("MANAGE_GUILD") || msg.member.permissions.has("ADMINISTRATOR") || msg.client.config.adminId.includes(msg.author.id))),
-}).setClockwork(async () => {
-  if(!Module.client.user.id == "854552593509253150") return;
-  try {
-    // Every 12 hours Mr.genie club members have a 30% chance a random item.
-    return setInterval(grantWishes("819036592173219841", 0.3/12), 1 * 60 * 60 * 1000);
-  } catch (e) { u.errorHandler(e, "Item granting clockwork error, Genie Club"); }
-}).setClockwork(async () => {
-  if(!Module.client.user.id == "854552593509253150") return;
-  try {
-    // Every 24 hours Thornrose club members have a 10% get a random item.
-    return setInterval(() => grantWishes("819036460929384489", 0.1/24), 1 * 60 * 60 * 1000);
-  } catch (e) { u.errorHandler(e, "Item granting clockwork error, Thornrose Club"); }
-}).setClockwork(async () => {
-  if(!Module.client.user.id == "854552593509253150") return;
-  try {
-    // Every 24 hours Team members have a 50% get a random item.
-    return setInterval(() => grantWishes("849748196742004836", 0.5/24), 1 * 60 * 60 * 1000);
-  } catch (e) { u.errorHandler(e, "Item granting clockwork error, Team"); }
-}).setClockwork(async () => {
-  try {
-    if(!Module || !Module.client || !Module.client.user || !Module.client.user.id == "854552593509253150") return;
-    // Every 24 hours Nobility members have a 1% get a random item.
-    return setInterval(() => grantWishes("821557037539917865", 0.01/24), 1 * 60 * 60 * 1000);
-  } catch (e) { u.errorHandler(e, "Item granting clockwork error, Nobility"); }
-})
+      } catch (e) { u.errorHandler(e, msg); }
+      u.postCommand(msg);
+    }
+  }).addCommand({
+    name: "paintballfight",
+    description: "starts a paint ball fight",
+    process: async (msg, suffix) => {
+      let paintball = await ItemUtils.resolveItem("🖌");
+      paintball.setFreeForAll(true);
+      msg.react("🎨");
+    },
+    permissions: (msg) => ItemUtils.hasInfiniteItems(msg.member),
+  });
 module.exports = Module;
