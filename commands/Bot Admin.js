@@ -69,7 +69,7 @@ Module.addCommand({
                     foo = `\`\`\`Output: ${foo}\`\`\``
                     msg.channel.send(foo.replace(msg.client.config.token, 'TOKEN-THAT-WAS-NEARLY-LEAKED').replace(msg.client.config.devLogs.error.token, 'WEBHOOK-TOKEN'));
                 } catch (error) {
-                    const embed = u.embed().setTitle("Sudo error: " + error.name);
+                    const embed = u.embed().setTitle("Sudo error: " + error.name).setColor(msg.guild ? msg.guild.members.cache.get(msg.client.user.id).displayHexColor : "000000");
                     let authorName = "unknown";
                     if (msg.author && msg.author.username) {
                         authorName = msg.author.username;
@@ -82,8 +82,11 @@ Module.addCommand({
                     if (msg.client && msg.client.user && msg.client.user) {
                         embed.addField("Bot", msg.client.user.username);
                     }
+                    let cleanContent = msg.cleanContent;
+                    if (cleanContent.length > 200)
+                    cleanContent = cleanContent.slice(0, 200);
                     embed.addField("Location", (msg.guild ? `${msg.guild.name} > ${msg.channel.name}` : "DM"), true)
-                        .addField("Command", msg.cleanContent || "`undefined`", true);
+                        .addField("Command", cleanContent || "`undefined`", true);
                     console.trace(error);
                     let stack = (error.stack ? error.stack : error.toString())
                     if (msg && msg.client && msg.client.config && msg.client.config.token && msg.client.config.devLogs && msg.client.config.devLogs.token) {
@@ -252,6 +255,7 @@ Module.addCommand({
                 let client = msg.client;
 
                 let embed = u.embed()
+                .setColor(msg.guild ? msg.guild.members.cache.get(msg.client.user.id).displayHexColor : "000000")
                     .setAuthor(client.user.username + " Heartbeat", client.user.displayAvatarURL())
                     .setTimestamp();
 

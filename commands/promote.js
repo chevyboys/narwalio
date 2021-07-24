@@ -10,10 +10,11 @@ async function getPromotableInventory(msg, ){
         }
         else member = await msg.guild.members.fetch(msg.author.id);
         let availableRoles = [].concat(...(inventory.filter((v, k) => member.roles.cache.has(k)).array()));
-        if(msg.author.id == msg.client.config.ownerId && !availableRoles.some(roleId => {roleId == "819034701209141298"})) {
+        if(msg.author.id == msg.client.config.ownerId && !(availableRoles.some(roleId => (roleId == "819034701209141298")))) {
           availableRoles.push("819034701209141298");
         }
         let embed = u.embed().setAuthor(member.displayName, member.user.displayAvatarURL({ size: 32 }))
+          .setColor(msg.guild ? msg.guild.members.cache.get(msg.client.user.id).displayHexColor : "000000")
           .setTitle("Promotable Inventory")
           .setDescription(`Promote a user (or users) to a role with \`${Module.config.prefix}promote [Role Name] [@users] \`\ne.g. \`${Module.config.prefix}promote moderator @etu\`\n\n<@&${availableRoles.join(">\n<@&")}>`);
         if (availableRoles.length == 0) {

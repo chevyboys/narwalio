@@ -46,7 +46,7 @@ async function postRandomCutie(urls, msg, timeout) {
         }
         if (randomURL.title.length > 255) randomURL.title = randomURL.title.substring(0, 255);
     } while (!randomURL || randomURL == undefined);
-    const embed = u.embed().setImage(randomURL.url).setTitle("From Reddit: " + randomURL.title).setURL(`https://reddit.com${randomURL.permalink}`).setFooter(`${randomURL.num_comments} comments, ${randomURL.ups} upvotes, posted by ${randomURL.author}`).setTimestamp((randomURL.created - 7 * 60 * 60) * 1000);
+    const embed = u.embed().setImage(randomURL.url).setTitle("From Reddit: " + randomURL.title).setURL(`https://reddit.com${randomURL.permalink}`).setFooter(`${randomURL.num_comments} comments, ${randomURL.ups} upvotes, posted by ${randomURL.author}`).setTimestamp((randomURL.created - 7 * 60 * 60) * 1000).setColor(msg.guild ? msg.guild.members.cache.get(msg.client.user.id).displayHexColor : "000000");
 
     try {
         const buttons = ["✅", "❌"];

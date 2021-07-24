@@ -44,6 +44,7 @@ function runTag(msg) {
   } else if (cmd && (cmd.command == "help") && (tags.get(msg.guild.id).size > 0) && !cmd.suffix) {
     let embed = u.embed()
       .setTitle("Custom tags in " + msg.guild.name)
+      .setColor(msg.guild ? msg.guild.members.cache.get(msg.client.user.id).displayHexColor : "000000")
       .setThumbnail(msg.guild.iconURL());
 
     let prefix = Module.config.prefix;
@@ -131,7 +132,7 @@ const Module = new Augur.Module().addCommand({
 
 
     try {
-      await dModule.db.init(Module.client);
+      await Module.db.init(Module.client);
     } catch (error) { u.errorHandler(error, "Initialize and update db"); }
   })
   .setInit(data => {
@@ -152,12 +153,14 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
   if ((reaction.emoji.name == "📌") && message.pinnable) {
     // Pin Request
     try {
+      let msg = message;
       if (message.channel.permissionsFor(user).has("MANAGE_MESSAGES") || message.channel.permissionsFor(user).has("ADMINISTRATOR") || message.channel.permissionsFor(user).has("MANAGE_WEBHOOKS")) {
         let messages = await message.channel.messages.fetchPinned().catch(u.noop);
         if (messages?.size == 50) return message.channel.send(`${user}, I was unable to pin the message since the channel pin limit has been reached.`).then(u.clean);
         else message.pin(`Requested by ${user.username}`);
       } else if (reaction.count == 1) {
         let embed = u.embed()
+          .setColor(msg.guild ? msg.guild.members.cache.get(msg.client.user.id).displayHexColor : "000000")
           .setTimestamp()
           .setAuthor(message.member.displayName + " 📌", message.member.user.displayAvatarURL())
           .setDescription(message.cleanContent)
@@ -172,7 +175,10 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
         const buttons = ["✅", "⛔"];
         for (const button of buttons) await dialog.react(button);
 
-        const react = await dialog.awaitReactions((reaction, user) => buttons.includes(reaction.emoji.name), { time: 20000 });
+        let react = await dialog.awaitReactions((reaction, user) => buttons.includes(reaction.emoji.name), { time: 20000 });
+        while(!react.size > 0) {
+          react = await dialog.awaitReactions((reaction, user) => buttons.includes(reaction.emoji.name), { time: 10000 });
+        }
         if (react.size == 1 && react.first().emoji.name == buttons[0]) {
           let messages = await message.channel.messages.fetchPinned().catch(u.noop);
           if (messages?.size == 50) return dialog.channel.send(`${user}, I was unable to pin the message since the channel pin limit has been reached.`).then(u.clean);
@@ -191,6 +197,7 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
     try {
       let embed = (message.embeds.length > 0 ? u.embed(message.embeds[0]) : null);
       embed?.setFooter(`Linked by ${message.guild.members.cache.get(user.id)?.displayName || user.username}`);
+      embed.setColor(msg.guild ? msg.guild.members.cache.get(msg.client.user.id).displayHexColor : "000000")
       message.guild.channels.cache.get("819031083639111703").send(message.content, { embed });
     } catch (e) { u.errorHandler(e, "Lounge Link Processing"); }
   }

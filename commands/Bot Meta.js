@@ -75,10 +75,11 @@ const Module = new Augur.Module()
             let prefix = Module.config.prefix;
             let commands = Module.client.commands.filter(c => c.permissions(msg) && c.enabled);
             let embed = u.embed()
+                .setColor(msg.guild.members.cache.get(msg.client.user.id).displayHexColor)
                 .setThumbnail(msg.client.user.displayAvatarURL({ size: 128 }));
 
             if (!suffix) { // FULL HELP
-                embed
+                embed .setColor(msg.guild ? msg.guild.members.cache.get(msg.client.user.id).displayHexColor : "000000")
                     .setTitle(msg.client.user.username + " Commands" + (msg.guild ? ` in ${msg.guild.name}.` : "."))
                     .setDescription(`You have access to the following commands. For more info, type \`${prefix}help <command>\`.`);
                 let categories;
@@ -114,6 +115,7 @@ const Module = new Augur.Module()
                                 return;
                             }
                             embed = u.embed().setTitle(msg.client.user.username + " Commands" + (msg.guild ? ` in ${msg.guild.name}.` : ".") + " (Cont.)")
+                                .setColor(msg.guild ? msg.guild.members.cache.get(msg.client.user.id).displayHexColor : "000000")
                                 .setDescription(`You have access to the following commands. For more info, type \`${prefix}help <command>\`.`);
                             i = 0;
                         }
