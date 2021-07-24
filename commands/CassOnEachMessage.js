@@ -12,7 +12,7 @@ function oddsThingsHappen(percentage) {
 }
 
 let DadJoke = {
-    possibleMatches = [],
+    possibleMatches: [],
     calculateIAmLocation: async (str) => {
         str = " " + str.toLowerCase().replace("-", " ").replace("_", " ");
     
@@ -122,7 +122,7 @@ let DadJoke = {
 }
 
 let BirbJoke = {
-    CursedRole = "867524884350238780",
+    CursedRole: "867524884350238780",
     revert: async (member) => {
         let revertedName = await member.displayName.replace(/▲/gm, "")
         await member.setNickname(revertedName);
