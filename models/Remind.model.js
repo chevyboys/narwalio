@@ -5,7 +5,7 @@ var RemindSchema = new Schema({
     discordId: String,
     reminder: String,
     timestamp: Date,
-    commandToExecute: String
+    commandToExecute: String,
 });
 
 module.exports = mongoose.model("Remind", RemindSchema);

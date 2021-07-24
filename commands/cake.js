@@ -66,7 +66,7 @@ async function testCakeDays(guild) {
           let years = curDate.year() - join.year();
           try {
             if (member.roles.cache.some((r) => { r.name.toLowerCase().indexOf("trusted") > -1 })) {
-              ldsg.channels.cache.get(Module.config.ldsg).send(`${member} has been part of the server for ${years} ${(years > 1 ? "years" : "year")}! Glad you're with us!`);
+              ldsg.channels.cache.get(ldsg.id).send(`${member} has been part of the server for ${years} ${(years > 1 ? "years" : "year")}! Glad you're with us!`);
             }
           } catch (e) { u.errorHandler(e, "Announce Cake Day Error"); continue; }
         }
@@ -138,7 +138,7 @@ Module.addCommand({
       msg.react("🎂");
       u.postCommand(msg);
     },
-    permissions: (msg) =>  msg.guild.id == "819031079104151573  "
+    permissions: (msg) =>  msg.guild.id == "819031079104151573"
   })
 
 module.exports = Module;

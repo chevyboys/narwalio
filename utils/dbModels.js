@@ -421,7 +421,8 @@ const models = {
                         stars: 0,
                         isGloballyBlacklisted: false,
                         excludeXP: false,
-                        roles: []
+                        roles: [],
+                        items: []
                     });
                     newMember.save((err, doc) => {
                         if (err) console.error(err);
