@@ -14,8 +14,8 @@ let serverSettings = new Map();
 const Utils = {
     Collection: Discord.Collection,
     initiateUtilsClient: function (client) {
-        if(client instanceof Discord.Client)
-        clientObj = client;
+        if (client instanceof Discord.Client)
+            clientObj = client;
         else Utils.log("Invalid Client");
     },
     clean: function (msg, t = 20000) {
@@ -67,7 +67,7 @@ const Utils = {
                 let UsrName = msg.author.username || msg.author.nickname || "unknown";
                 embed.addField("User", UsrName, true)
             }
-            if(msg.client && msg.client.user && msg.client.user) {
+            if (msg.client && msg.client.user && msg.client.user) {
                 embed.addField("Bot", msg.client.user.username);
             } else if (clientObj) {
                 embed.addField("Bot", clientObj.user.username);
@@ -89,39 +89,52 @@ const Utils = {
         if (stack.length > 1024) stack = stack.slice(0, 1000);
 
         embed.addField("Error", stack);
-        
+
         errorLog.send(embed);
     },
     errorLog,
     escape: (text, options = {}) => Discord.escapeMarkdown(text, options),
     escapeText: (txt) => txt.replace(/(\*|_|`|~|\\|\|)/g, '\\$1'),
+    getClient: () => { return clientObj },
     getUser: function (msg, user, strict = false) {
         // Finds a user in the same guild as the message.
 
         // If no user to look for, return message author.
-        if (user.length == 0 || !msg.guild) return (msg.guild ? msg.member : msg.author);
+        if (!user || user.length == 0 || !msg.guild) return (msg.guild ? msg.member : msg.author);
 
-        const lcUser = user.toLowerCase();
-        const memberCollection = msg.guild.members.cache;
+        let lcUser = user.toLowerCase();
+        let memberCollection = msg.guild.members.cache;
 
         let myFn = (element) => false;
         // If there's a discriminator given, look for exact match
-        if (lcUser.length > 5 && lcUser.charAt(lcUser.length - 5) === "#") { myFn = (element) => element.user.tag.toLowerCase() === lcUser; }
+        if (lcUser.length > 5 && lcUser.charAt(lcUser.length - 5) === "#")
+            myFn = (element) => element.user.tag.toLowerCase() === lcUser;
         // Otherwise look for exact match of either nickname or username
-        else if (!strict) { myFn = (element) => (element.displayName.toLowerCase() === lcUser || element.user.username.toLowerCase() === lcUser); }
+        else if (!strict)
+            myFn = (element) => (element.displayName.toLowerCase() === lcUser || element.user.username.toLowerCase() === lcUser);
 
         let foundUser = memberCollection.find(myFn);
 
+
+        // If still no match, search by ID
+        if (!foundUser)
+            foundUser = memberCollection.get(user);
         // If no exact match, find a user whose nick or username begins with the query
+
         if (!foundUser && !strict) {
-            myFn = (element) => (element.displayName.toLowerCase().startsWith(lcUser) || element.user.username.toLowerCase().startsWith(lcUser));
+            myFn = (element) => {
+                if (element.length < 3) return false;
+                else return (element.displayName.toLowerCase().startsWith(lcUser) || element.user.username.toLowerCase().startsWith(lcUser));
+            }
             foundUser = memberCollection.find(myFn);
         }
-        // If still no match, search by ID
-        if (!foundUser) { foundUser = memberCollection.get(user); }
+        //if still no match, return first person mentioned in message
+        if (!foundUser && !strict)
+            foundUser = msg.membentions.users.first();
 
         // If still no match, return message author
-        if (!foundUser && !strict) { foundUser = msg.member; }
+        if (!foundUser && !strict)
+            foundUser = msg.member;
 
         return foundUser;
     },
@@ -134,19 +147,19 @@ const Utils = {
         }
     },
     log: async (msg, color, client) => {
-        if(client && !clientObj && client instanceof Discord.Client) clientObj = client;
+        if (client && !clientObj && client instanceof Discord.Client) clientObj = client;
         let commandName = "";
         let logger = "";
         let embed = Utils.embed()
-        let embedColor; 
+        let embedColor;
         const [hour, minute, second] = new Date().toLocaleTimeString("en-US").split(/:| /);
         if (msg instanceof Discord.Message) {
             embedColor = await msg.guild.members.cache.get(msg.client.user.id).displayHexColor;
             commandName = Utils.parse(msg).command;
             embed.setColor(embedColor)
-            .setAuthor(msg.member ? msg.member.displayName + " called " + commandName: msg.author.username + " called " + commandName, msg.author.displayAvatarURL())
-            .setFooter(`${msg.client.user.username}`);
-            logger =  msg.cleanContent;
+                .setAuthor(msg.member ? msg.member.displayName + " called " + commandName : msg.author.username + " called " + commandName, msg.author.displayAvatarURL())
+                .setFooter(`${msg.client.user.username}`);
+            logger = msg.cleanContent;
             if (msg && msg.client && msg.client.config && msg.client.config.token && msg.client.config.devLogs && msg.client.config.devLogs.token) {
                 logger = logger.replace(msg.client.config.token, 'TOKEN-THAT-WAS-NEARLY-LEAKED').replace(msg.client.config.devLogs.token, 'WEBHOOK-TOKEN');
             }
@@ -160,18 +173,18 @@ const Utils = {
                 logger = logger.replace(msg.client.config.token, 'TOKEN-THAT-WAS-NEARLY-LEAKED').replace(msg.client.config.devLogs.token, 'WEBHOOK-TOKEN');
             }
             embed.setColor(embedColor)
-            .setTitle(commandName)
-            .setDescription(logger);
-            if (clientObj){
+                .setTitle(commandName)
+                .setDescription(logger);
+            if (clientObj) {
                 let Chan = await clientObj.channels.fetch(config.devLogs.logChannel.id);
                 let BotGuildMember = await Chan.guild.members.fetch(clientObj.user.id)
                 let username = BotGuildMember.displayName;
                 embed.setAuthor(username, clientObj.user.displayAvatarURL())
-                .setFooter(`${clientObj.user.username}`);
+                    .setFooter(`${clientObj.user.username}`);
             }
         }
         console.log(logger);
-        if(clientObj) clientObj.channels.cache.get(config.devLogs.logChannel.id).send({embed});
+        if (clientObj) clientObj.channels.cache.get(config.devLogs.logChannel.id).send({ embed });
         // eslint-disable-next-line no-undef
 
     },
@@ -196,7 +209,7 @@ const Utils = {
     postCommand: async (msg, disableLog = false) => {
         if (msg.author.bot) return;
         await msg.channel.stopTyping();
-        if(!disableLog) u.log(msg);
+        if (!disableLog) u.log(msg);
     },
     preCommand: (msg) => {
         if (msg.author.bot) return;
