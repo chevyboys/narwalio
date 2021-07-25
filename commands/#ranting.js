@@ -48,6 +48,7 @@ async function normalizeConcern(reductionPercent, msg) {
     if (!Module.client.user) return;
     if (Module.client.user.id == EtuID) channel = await Module.client.channels.cache.get("868684629857669130");
     else channel = await Module.client.channels.cache.get("868685481204940800");
+    if(msg) channel = msg.channel;
     if (!channel) return;
 
     users = users.filter(u => {
@@ -60,8 +61,8 @@ async function normalizeConcern(reductionPercent, msg) {
 
     let i = 0;
     for (user of users) {
-        if (user.concernScoreLastHour < concernScore) {
-            embed.addField((channel.guild.members.cache.has(user.discordId) ? (channel.guild.members.cache.get(user.discordId).displayName) : null), `Total: \`${user.concernScore} (Δ${user.concernScore - user.concernScoreLastHour})\``);
+        if (user.concernScoreLastHour < user.concernScore && (user.concernScore > 10 || msg)) {
+            embed.addField((channel.guild.members.cache.has(user.discordId) ? (channel.guild.members.cache.get(user.discordId).displayName) : null), `Total: \`${user.concernScore} (Δ${(user.concernScore - user.concernScoreLastHour)})\``);
             if (i == 20) {
                 try {
                     channel.send({ embed });
@@ -76,9 +77,9 @@ async function normalizeConcern(reductionPercent, msg) {
             i++;
         }
         if (reductionPercent > 0) {
-            awaitupdateConcernScore(user, 0 - (user.concernScore < 1 ? user.concernScore : user.concernScore * (reductionPercent || 5) / 100));
-            let newScore = user.concernScore - (user.concernScore < 1 ? user.concernScore : user.concernScore * (reductionPercent || 5) / 100);
+            let newScore = user.concernScore - (user.concernScore < 1 ? user.concernScore : (user.concernScore * (reductionPercent || 5) / 100) + 1);
             await Module.db.user.update(user, { concernScoreLastHour: newScore });
+            await updateConcernScore(user, 0 - (user.concernScore < 1 ? user.concernScore : (user.concernScore * (reductionPercent || 5) / 100) + 1));
         }
     }
     try {

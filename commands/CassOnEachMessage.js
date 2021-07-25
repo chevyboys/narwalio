@@ -107,7 +107,7 @@ let DadJoke = {
                 msg.member.previousNick = msg.member.displayName;
     
                 setTimeout(async () => {
-                    await revert(member);
+                    await DadJoke.revert(msg.member);
                 }, secondsOfNameChange * 1000);
             }
             msg.member.setNickname(dadJokeName, "For the memes");
@@ -197,13 +197,20 @@ Module.addEvent("message", (msg) => {
     coolkids(msg);
     eyeSpeakToYou(msg);
 }).setUnload(async () => {
-    const guild = await Module.client.guilds.fetch(cassKingdom);
+    try {
+        const guild = await Module.client.guilds.fetch(cassKingdom);
     const members = await guild.members.cache;
     for (member of members) {
         if (!member.manageable) return;
         if (member.roles.cache.has(BirbJoke.CursedRole)) await BirbJoke.revert(member);
         await DadJoke.revert(member);
     }
+    } catch (error) {
+        if(error.toString().toLowerCase().indexOf("missing access") < 0) {
+            throw error;
+        }
+    }
+    
 });
 
 module.exports = Module;
