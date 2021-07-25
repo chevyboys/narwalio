@@ -19,6 +19,8 @@ EtuClient.once('ready', () => {
     const onStart = require("./utils/on start");
     onStart.onStart(EtuClient);
     EtuClient.categories = config.categories;
+    EtuClient.user.setActivity("from the sky", {type: "WATCHING"});
+    EtuClient.user.setStatus("idle");
     //prevent accidental name capitalization from breaking things.
     EtuClient.commands.forEach(element => {
         element.name = element.name.toLowerCase();

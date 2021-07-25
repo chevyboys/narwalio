@@ -412,6 +412,7 @@ const models = {
                 else if (!doc) {
                     let newMember = new User({
                         discordId: user,
+                        concernScore: 0,
                         aliases: null,
                         lastGoodMorning: null,
                         wantsGoodMorningMessages: false,
@@ -487,7 +488,7 @@ const models = {
             });
         });
         bot.users.cache.forEach((cachedUser) => {
-            User.findOne({discordId : cachedUser.id}, (err, user) => {
+            User.findOne({ discordId: cachedUser.id }, (err, user) => {
                 if (!err && user) {
                     models.user.update(user, cachedUser)
                 } else {

@@ -4,6 +4,7 @@ var mongoose = require('mongoose'),
 var UserSchema = new Schema({
     discordId: String,
     aliases: [String],
+    concernScore: Number,
     wantsGoodMorningMessage: {
         type: Boolean,
         default: false

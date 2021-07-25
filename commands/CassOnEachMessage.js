@@ -17,7 +17,7 @@ let DadJoke = {
         str = " " + str.toLowerCase().replace("-", " ").replace("_", " ");
     
         //If possible matches is empty, we need to calculate the possible matches. Should only be run on the first usage of the class.
-        if (possibleMatches.length < 1) {
+        if (DadJoke.possibleMatches.length < 1) {
             //set up variables
             const selfPronouns = "i, my name".toLowerCase().replace(" ", "").split(",");
             selfPronouns.forEach((pronoun) => pronoun = pronoun.replace(",", ""));
@@ -28,19 +28,19 @@ let DadJoke = {
             const specialMatches = "am, im, call me".toLowerCase().replace(" ", "").split(",");
             specialMatches.forEach((match) => {
                 match = ` ${match.replace(",", "").trim()} `;
-                possibleMatches.push(match);
+                DadJoke.possibleMatches.push(match);
             });
             //create possbile matches
             for (const verb of beVerbs) {
                 for (const pronoun of selfPronouns) {
                     let matchable = ` ${pronoun}${verb} `;
-                    await possibleMatches.push(matchable);
+                    await DadJoke.possibleMatches.push(matchable);
                 }
             }
         }
     
         //find all the matches
-        for (const possibleMatch of possibleMatches) {
+        for (const possibleMatch of DadJoke.possibleMatches) {
             if (str.indexOf(possibleMatch) > -1) {
                 return str.indexOf(possibleMatch) + possibleMatch.length - 1;
             }
@@ -49,6 +49,7 @@ let DadJoke = {
     
     },
     revert: async (member) => {
+        u.postCommand()
         if (!member.previousNick) return;
         await member.setNickname(member.previousNick, "Restoring order");
         member.previousNick = null;
@@ -65,7 +66,8 @@ let DadJoke = {
             || !msg.member.manageable
             || msg.member.roles.cache.find(r => r.name == "🛡")
         ) { return }
-        let imLocation = await calculateIAmLocation(msg.content);
+        u.preCommand();
+        let imLocation = await DadJoke.calculateIAmLocation(msg.content);
         if (imLocation < 0) return;
     
         //calculate new dad joke name
@@ -101,12 +103,10 @@ let DadJoke = {
         }
         dadJokeName = dadJokeName + postFix;
         try {
-            msg.channel.startTyping();
             if (!msg.member.previousNick) {
                 msg.member.previousNick = msg.member.displayName;
     
                 setTimeout(async () => {
-                    msg.channel.stopTyping();
                     await revert(member);
                 }, secondsOfNameChange * 1000);
             }
@@ -124,14 +124,16 @@ let DadJoke = {
 let BirbJoke = {
     CursedRole: "867524884350238780",
     revert: async (member) => {
+        u.postCommand();
         let revertedName = await member.displayName.replace(/▲/gm, "")
         await member.setNickname(revertedName);
-        await member.roles.remove(CursedRole);
+        await member.roles.remove(BirbJoke.CursedRole);
     },
     initiate: async (msg) => {
             oddsOfGettingBirbJoked = 1,
             secondsOfbeforeRevert = 600;
-        let isBirbCursed = (msg.member ? (msg.member.roles.cache.find(r => r.id == CursedRole)) : false)
+        if(!msg.guild.id == "819031079104151573");
+        let isBirbCursed = (msg.member ? (msg.member.roles.cache.find(r => r.id == BirbJoke.CursedRole)) : false)
         //make sure we should actually birbcurse this person
         if (
             (!oddsThingsHappen(oddsOfGettingBirbJoked) || isBirbCursed)
@@ -139,6 +141,7 @@ let BirbJoke = {
             || !msg.member.manageable
             || await msg.member.roles.cache.find(r => r.name == "🛡")
         ) { return }
+        u.preCommand();
         let postFix = "";
         if (msg.member.roles.cache.has("819031079298138187")) {
             postFix = ` | Admin`;
@@ -152,7 +155,7 @@ let BirbJoke = {
     
         await msg.member.setNickname(newName);
         msg.channel.send(`${msg.member.displayName} has been birbcursed!`);
-        await msg.member.roles.add(CursedRole);
+        await msg.member.roles.add(BirbJoke.CursedRole);
         setTimeout(async () => {
             revertBirbCurse(msg.member);
         }, secondsOfbeforeRevert * 1000)
@@ -194,7 +197,7 @@ Module.addEvent("message", (msg) => {
     coolkids(msg);
     eyeSpeakToYou(msg);
 }).setUnload(async () => {
-    const guild = await Module.client.guilds.cache.get(cassKingdom);
+    const guild = await Module.client.guilds.fetch(cassKingdom);
     const members = await guild.members.cache;
     for (member of members) {
         if (!member.manageable) return;

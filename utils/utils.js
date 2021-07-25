@@ -46,6 +46,7 @@ const Utils = {
         }
         catch (error) { Utils.errorHandler(error, "Confirmation Prompt"); }
     },
+    
     embed: (data, color) => new Discord.MessageEmbed(data).setColor(color || config.color).setTimestamp(),
     errorHandler: function (error, msg = null) {
         if (!error) return;
@@ -146,6 +147,7 @@ const Utils = {
             return `https://discord.com/channels/${msg.guild.id}/${msg.channel.id}/${msg.id}`;
         }
     },
+    globalDebug: false,
     log: async (msg, color, client) => {
         if (client && !clientObj && client instanceof Discord.Client) clientObj = client;
         let commandName = "";
@@ -207,13 +209,20 @@ const Utils = {
         return null;
     },
     postCommand: async (msg, disableLog = false) => {
-        if (msg.author.bot) return;
-        await msg.channel.stopTyping();
-        if (!disableLog) u.log(msg);
+        if (msg) {
+            if (msg.author.bot) return;
+            await msg.channel.stopTyping();
+            if (!disableLog) u.log(msg);
+        }
+        if(!Utils.globalDebug) clientObj.user.setStatus("idle");
+        else clientObj.user.setStatus("dnd");
     },
     preCommand: (msg) => {
-        if (msg.author.bot) return;
-        msg.channel.startTyping();
+        if (msg) {
+            if (msg.author.bot) return;
+            msg.channel.startTyping();
+        }
+     clientObj.user.setStatus("online");  
     },
     properCase: (txt) => txt.split(" ").map(word => (word[0].toUpperCase() + word.substr(1).toLowerCase())).join(" "),
     //sets the avatar of the bot
