@@ -157,7 +157,7 @@ let BirbJoke = {
         msg.channel.send(`${msg.member.displayName} has been birbcursed!`);
         await msg.member.roles.add(BirbJoke.CursedRole);
         setTimeout(async () => {
-            revertBirbCurse(msg.member);
+            BirbJoke.revert(msg.member);
         }, secondsOfbeforeRevert * 1000)
     },
 }
