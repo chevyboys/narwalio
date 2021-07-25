@@ -9,43 +9,80 @@ let updateConcernScore = async (user, change) => {
     u.log("updating concern score");
     if (!change) return;
     change = change + 0;
-    let currentConcern = (await Module.db.user.fetchUser(user)).concernScore;
+    if (!user) return;
+    if (!(await Module.db.user.fetchUser(user))) {
+        return;
+    }
+    let userFromDataBase = await Module.db.user.fetchUser(user);
+    let currentConcern = userFromDataBase.concernScore;
+    if (currentConcern > 100 || change > 50) {
+        let EtuID = "854552593509253150";
+    let NarwalioID = "637030744610439176";
+        if (!Module.client.user) return;
+        if (Module.client.user.id == EtuID) channel = await Module.client.channels.cache.get("868684629857669130");
+        else channel = await Module.client.channels.cache.get("868685481204940800");
+        if (!channel) return;
+        let member = user.discordId || user.id || user;
+        if(channel.guild.members.cache.has(member)) {
+            member = channel.guild.members.cache.get(member);
+            let embed = u.embed()
+            .setColor("#FF0000")
+            .setThumbnail(member.user.displayAvatarURL({ size: 128 }))
+            .setTitle("High Concern Levels Detected for " + member.displayName)
+            .setDescription(`Concern level: \`\`\`${currentConcern + change > 50 ? "diff\n- " + (currentConcern + change) : (currentConcern + change)}\`\`\``)
+            .addField(`ΔLast Message:`, `Concern increase from the last message: \`\`\`${change > 50 ? "diff\n- " + change : change} \`\`\``)
+            .addField(`ΔLast few minutes:`, `Concern increase over the last few minutes \`\`\`${(currentConcern - userFromDataBase.concernScoreLastHour) > 50 ? "diff\n- " + (currentConcern - userFromDataBase.concernScoreLastHour) : (currentConcern - userFromDataBase.concernScoreLastHour)} \`\`\``);
+            channel.send(`<@487085787326840843>`,{embed: embed});
+        }
+        
+
+    }
     await Module.db.user.update(user, { concernScore: (change + currentConcern) });
 }
 
 async function normalizeConcern(reductionPercent, msg) {
     let users = (await Module.db.user.getUsers({ concernScore: { $gt: 0 } }));
-    if (msg) {
-        users = users.filter(u => {
-            return (msg.guild.members.cache.has(u.discordId) ? !(msg.guild.members.cache.get(u.discordId).user.bot) : false);
-        });
-    }
-    let concernLog = [];
-    let embed = u.embed().setColor("#a1fdff").setTitle("User Concern Levels This hour");
-    let channel;
     let EtuID = "854552593509253150";
-    let NarwalioID = "637030744610439176"
+    let NarwalioID = "637030744610439176";
+    let channel;
+    if (!Module.client.user) return;
     if (Module.client.user.id == EtuID) channel = await Module.client.channels.cache.get("868684629857669130");
     else channel = await Module.client.channels.cache.get("868685481204940800");
+    if (!channel) return;
+
+    users = users.filter(u => {
+        return (channel.guild.members.cache.has(u.discordId) ? !(channel.guild.members.cache.get(u.discordId).user.bot) : false);
+    });
+
+    if (users.length < 1) return;
+
+    let embed = u.embed().setColor("#a1fdff").setTitle("User Concern Levels This hour");
+
     let i = 0;
     for (user of users) {
-        embed.addField((channel.guild.members.cache.has(user.discordId) ? (channel.guild.members.cache.get(user.discordId).displayName || Module.client.users.cache.get(user.discordId).username) : Module.client.users.cache.get(user.discordId).username), `Total: \`${user.concernScore}\``);
-        if (i == 20) {
-            try {
-                channel.send({ embed });
+        if (user.concernScoreLastHour < concernScore) {
+            embed.addField((channel.guild.members.cache.has(user.discordId) ? (channel.guild.members.cache.get(user.discordId).displayName) : null), `Total: \`${user.concernScore} (Δ${user.concernScore - user.concernScoreLastHour})\``);
+            if (i == 20) {
+                try {
+                    channel.send({ embed });
 
-            } catch (e) {
-                u.log("Concern Error:" + e.toString());
-                return;
+                } catch (e) {
+                    u.log("Concern Error:" + e.toString());
+                    return;
+                }
+                embed = u.embed().setColor("#a1fdff").setTitle("User Concern Levels This hour (Cont.)");
+                i = 0;
             }
-            embed = u.embed().setColor("#a1fdff").setTitle("User Concern Levels This hour (Cont.)");
-            i = 0;
+            i++;
         }
-        i++;
-        if (reductionPercent > 0) updateConcernScore(user, 0 - (user.concernScore < 1 ? user.concernScore : user.concernScore * (reductionPercent || 5) / 100));
+        if (reductionPercent > 0) {
+            awaitupdateConcernScore(user, 0 - (user.concernScore < 1 ? user.concernScore : user.concernScore * (reductionPercent || 5) / 100));
+            let newScore = user.concernScore - (user.concernScore < 1 ? user.concernScore : user.concernScore * (reductionPercent || 5) / 100);
+            await Module.db.user.update(user, { concernScoreLastHour: newScore });
+        }
     }
     try {
-        channel.send({ embed });
+        if (i > 0) channel.send({ embed });
 
     } catch (e) {
         u.log("Concern Error:" + e.toString());
@@ -141,7 +178,7 @@ Module
         + ((msg.channel.id == rantingChannel) ? (args.length * weights.rantingMessageLength) : 0);
         if (total > 0) {
             await updateConcernScore(msg.author, total);
-            console.log(`Concern for ${msg.member.displayname} increased by: ${total}`);
+            console.log(`Concern for ${msg.member.displayName} increased by: ${total}`);
         }
     }
     );
@@ -149,7 +186,9 @@ Module
 
 Module.setClockwork(() => {
     try {
-        return setInterval(normalizeConcern, 60 * 60 * 1000);
+        return setInterval(async () => {
+            await normalizeConcern();
+        }, (60 * 60 * 1000));
     } catch (e) { u.errorHandler(e, "Normalize Concern Clockwork Error"); }
 });
 module.exports = Module;

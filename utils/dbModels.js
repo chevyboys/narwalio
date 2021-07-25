@@ -413,6 +413,7 @@ const models = {
                     let newMember = new User({
                         discordId: user,
                         concernScore: 0,
+                        concernScoreLastHour: 0,
                         aliases: null,
                         lastGoodMorning: null,
                         wantsGoodMorningMessages: false,

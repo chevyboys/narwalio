@@ -5,6 +5,7 @@ var UserSchema = new Schema({
     discordId: String,
     aliases: [String],
     concernScore: Number,
+    concernScoreLastHour: Number,
     wantsGoodMorningMessage: {
         type: Boolean,
         default: false
