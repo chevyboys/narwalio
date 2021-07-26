@@ -78,7 +78,7 @@ async function normalizeConcern(reductionPercent, msg) {
         }
         if (reductionPercent > 0) {
             let newScore = user.concernScore - (user.concernScore < 1 ? user.concernScore : (user.concernScore * (reductionPercent || 5) / 100) + 1);
-            await Module.db.user.update(user, { concernScoreLastHour: newScore });
+            await Module.db.user.update(user.discordId, { concernScoreLastHour: newScore });
             await updateConcernScore(user, 0 - (user.concernScore < 1 ? user.concernScore : (user.concernScore * (reductionPercent || 5) / 100) + 1));
         }
     }
