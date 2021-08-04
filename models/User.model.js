@@ -3,6 +3,7 @@ var mongoose = require('mongoose'),
 
 var UserSchema = new Schema({
     discordId: String,
+    discordUsername: String,
     aliases: [String],
     concernScore: Number,
     concernScoreLastHour: Number,
