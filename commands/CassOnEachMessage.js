@@ -130,9 +130,9 @@ let BirbJoke = {
         await member.roles.remove(BirbJoke.CursedRole);
     },
     initiate: async (msg) => {
-            oddsOfGettingBirbJoked = 1,
+            oddsOfGettingBirbJoked = 0.1,
             secondsOfbeforeRevert = 600;
-        if(!msg.guild.id == "819031079104151573");
+        
         let isBirbCursed = (msg.member ? (msg.member.roles.cache.find(r => r.id == BirbJoke.CursedRole)) : false)
         //make sure we should actually birbcurse this person
         if (
@@ -193,13 +193,14 @@ async function eyeSpeakToYou(msg) {
 
 Module.addEvent("message", (msg) => {
     DadJoke.initiate(msg);
+    if(!msg.guild || !msg.guild.id == "819031079104151573") return;
     BirbJoke.initiate(msg);
     coolkids(msg);
     eyeSpeakToYou(msg);
 }).setUnload(async () => {
     try {
-        const guild = await Module.client.guilds.fetch(cassKingdom);
-    const members = await guild.members.cache;
+    const guild = await Module.client.guilds.fetch(cassKingdom);
+    const members = await guild.members.fetch();
     for (member of members) {
         if (!member.manageable) return;
         if (member.roles.cache.has(BirbJoke.CursedRole)) await BirbJoke.revert(member);
