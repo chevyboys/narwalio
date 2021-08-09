@@ -43,7 +43,7 @@ let isCKMember = (member) => {
 let CKnick = {
   getMemberTitle: (member) => {
     if(!isCKMember(member)) return null;
-    for (const role of staffRoles) {
+    for (const role of suffixRoles) {
       if (member.roles.cache.has(role[0])) {
        return ` | ${role[1]}`;
       }
