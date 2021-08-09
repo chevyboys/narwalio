@@ -7,8 +7,8 @@ async function celebrate() {
   if (Module.client.user.id != "854552593509253150"){
     return;
   }
-  let guild = await Module.client.guilds.cache.get("819031079104151573")
-  if (moment().hours() == 15) {
+ let guild = await Module.client.guilds.cache.get("819031079104151573")
+  if (moment().hours() == 9) {
     testBirthdays(guild).catch(error => u.errorHandler(error, "Test Birthdays"));
     testCakeDays(guild).catch(error => u.errorHandler(error, "Test Cake Days"));
   }
@@ -34,13 +34,17 @@ async function testBirthdays(guild) {
     for (let birthdayPeep of birthdayPeeps) {
       try { 
         let date = moment(birthdayPeep.birthday);
-        if (date && date.month() == curDate.month() && date.date() == curDate.date()) {
-          let member = await ldsg.members.fetch(birthdayPeep.discordId);  
+        let member = await ldsg.members.fetch(birthdayPeep.discordId);  
+        if (date && date.month() == curDate.month() && date.date() == curDate.date()) {      
           await ldsg.channels.cache.get("821494049663221820").send(`:birthday: :confetti_ball: :tada: Happy Birthday, ${member}! :tada: :confetti_ball: :birthday:`);
+          member.roles.add("874365292808110140");
           let msgs = birthdayLangs.map(lang => member.send(u.rand(flair) + " " + lang));
           Promise.all(msgs).then(() => {
             member.send(":birthday: :confetti_ball: :tada: A very happy birthday to you, from " + guild.name + "! :tada: :confetti_ball: :birthday:").catch(u.noop);
           }).catch(u.noop);
+        }
+        else if(member.roles.cache.has("874365292808110140"){
+          member.roles.remove("874365292808110140");
         }
       } catch (e) { u.errorHandler(e, "Birthay Send"); continue; }
     }
