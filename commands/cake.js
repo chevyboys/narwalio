@@ -43,7 +43,7 @@ async function testBirthdays(guild) {
             member.send(":birthday: :confetti_ball: :tada: A very happy birthday to you, from " + guild.name + "! :tada: :confetti_ball: :birthday:").catch(u.noop);
           }).catch(u.noop);
         }
-        else if(member.roles.cache.has("874365292808110140"){
+        else if(member.roles.cache.has("874365292808110140")){
           member.roles.remove("874365292808110140");
         }
       } catch (e) { u.errorHandler(e, "Birthay Send"); continue; }
