@@ -17,7 +17,7 @@ const client = new AugurClient(config, {
 client.once('ready', () => {
     const onStart = require("./utils/on start");
     onStart.onStart(client);
-    client.categories = config.categories;
+    //client.categories = config.categories;
     //prevent accidental name capitalization from breaking things.
     client.commands.forEach(element => {
         element.name = element.name.toLowerCase();
