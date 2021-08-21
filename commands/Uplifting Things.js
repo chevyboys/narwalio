@@ -139,7 +139,32 @@ const Module = new Augur.Module()
     }).addEvent("presenceUpdate", async (oldPresence, newPresence) => {
         if ((!newPresence.member.roles.cache.some(role => role.name === `Narwalio's Favorite`)) && !newPresence.member.roles.cache.some(role => role.id == `843536251574943794`)) { return };
         const now = new Date();
-        const [hour, minute, second] = new Date().toLocaleTimeString("en-US", { hour: 'numeric', hour12: false }).split(/:| /);
+        let timeZone = "America/Denver";
+        let timeZoneRoles = {
+            UnitedStates: {
+                roleId: "840609122059288596",
+                timeZone: "America/Denver"
+            },
+            UnitedKingdom: {
+                roleId: "840607657546481704",
+                timeZone: "Europe/London"
+            },
+            Hawaii: {
+                roleId: "875404622657880074",
+                timeZone: "Pacific/Honolulu"
+            },
+            GMT8: {
+                roleId: "875403948851343410",
+                timeZone: "Etc/GMT+8"
+            },
+        }
+        for (const TZrole in timeZoneRoles) {
+            if (newPresence.member.roles.cache.some(role => role.id == TZrole.roleId )) {
+                timeZone = TZrole.timeZone; 
+            } 
+        }
+        
+        const [hour, minute, second] = new Date().toLocaleTimeString("en-US", {timeZone: timeZone, hour: 'numeric', hour12: false }).split(/:| /);
         const day = now.getDay();
         let lastGM = await Module.db.user.fetchUser(newPresence.member.user.id);
         lastGM = lastGM.lastGoodMorning;
