@@ -164,14 +164,14 @@ const Module = new Augur.Module()
             } 
         }
         
-        const [hour, minute, second] = new Date().toLocaleTimeString("en-US", {timeZone: timeZone, hour: 'numeric', hour12: false }).split(/:| /);
-        const day = now.getDay();
+        const [weekday, hour, minute, second] = new Date().toLocaleTimeString("en-US", {timeZone: timeZone, hour: 'numeric', hour12: false }).split(/:| /);
+        const day = weekday;
         let lastGM = await Module.db.user.fetchUser(newPresence.member.user.id);
         lastGM = lastGM.lastGoodMorning;
         //if (oldPresence) console.log(`${lastGoodMorningSent.get(newPresence.member.user.id)}/${day}:${hour}:${minute}:${second}\nIs admin? ${Module.config.adminId.includes(newPresence.member.user.id)}\nPresence:${(oldPresence.status)}->${newPresence.status}`.green)
         //else console.log(`${lastGoodMorningSent.get(newPresence.member.user.id)}/${day}:${hour}:${minute}:${second}\nIs ${newPresence.member.nickname} admin? ${Module.config.adminId.includes(newPresence.member.user.id)}\nPresence: ??? ->${newPresence.status}`.green)
         if (
-            ((hour > 3 && hour < 11) || Module.config.adminId.includes(newPresence.member.user.id)) &&
+            ((hour > 4 && hour < 11) || Module.config.adminId.includes(newPresence.member.user.id)) &&
             (!oldPresence || !(oldPresence.status == "online" || oldPresence.status == "idle"))
             && (newPresence.status == "online" || newPresence.status == "idle")
             && (lastGM == null) || lastGM != day) {
