@@ -61,9 +61,8 @@ async function testCakeDays(guild) {
   const members = await ldsg.members.fetch();
     let offsets = await Module.db.user.getUsers({ discordId: { $in: members.keyArray() } });
 
-    for (let [key, member] of members.filter(m => m.roles.cache.has(Module.config.roles.trusted))) {
+    for (let [key, member] of members) {
       try {
-
         let offset = offsets.find(o => o.discordId == key);
         let join = moment(member.joinedAt).subtract(0, "days");
         if (join && (join.month() == curDate.month()) && (join.date() == curDate.date()) && (join.year() < curDate.year())) {
