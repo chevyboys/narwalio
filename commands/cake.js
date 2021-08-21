@@ -122,6 +122,11 @@ Module.addCommand({
     syntax: "Month/Day", hidden: true,
     process: async (msg, suffix) => {
       u.preCommand(msg);
+      let member = msg.author;
+        if (msg.mentions.users.size && (msg.member.roles.cache.some(r => r.name.toLowerCase() === "admin") || msg.member.roles.cache.some(r => r.name.toLowerCase() === "moderator"))) {
+          member = (await msg.guild.members.fetch(msg.mentions.users.first().id)) .user;
+          suffix = suffix.replace(/<+.*>\s*/gm, "");
+        }
       suffix = suffix.trim();
       try {
         let bd = new Date(suffix);
@@ -138,7 +143,7 @@ Module.addCommand({
         u.postCommand(msg);
         return;
       }
-      Module.db.user.update(msg.author, {birthday: suffix});
+      Module.db.user.update(member, {birthday: suffix});
       msg.react("🎂");
       u.postCommand(msg);
     },
