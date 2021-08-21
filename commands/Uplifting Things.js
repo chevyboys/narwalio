@@ -164,7 +164,7 @@ const Module = new Augur.Module()
             } 
         }
         
-        const [weekday, hour, minute, second] = new Date().toLocaleTimeString("en-US", {timeZone: timeZone, hour: 'numeric', hour12: false }).split(/:| /);
+        const [weekday, hour, minute, second] = new Date().toLocaleTimeString("en-US", {timeZone: timeZone, hour: 'numeric', hour12: false, weekday: 'long'}).split(/:| /);
         const day = weekday;
         let lastGM = await Module.db.user.fetchUser(newPresence.member.user.id);
         lastGM = lastGM.lastGoodMorning;
