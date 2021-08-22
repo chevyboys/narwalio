@@ -13,6 +13,7 @@ const suffixRoles = [
 const birbCursedRole = "867524884350238780";
 const crownRole = "";
 const birthdayPeepRole = "874365292808110140";
+const ooooooCursedRole = "879117142191132773";
 
 const indicatorSymbols = [
 	{ emoji: "🍰",
@@ -70,6 +71,9 @@ let CKnick = {
 					baseName = baseName.replaceAll(symbol.emoji, "");
 				}
      }
+	 	if(member.roles.cache.has(ooooooCursedRole)) {
+			 baseName = baseName.replaceAll("⬡","O");
+		 }
 		return baseName.trim();
   },
 	getCorrectNickName: (member) => {
