@@ -11,7 +11,7 @@
     "dependencies": {
         "augurbot": "^2.5.5",
         "aws4": "^1.11.0",
-        "axios": "^0.21.1",
+        "axios": "^0.21.2",
         "colors": "^0.6.2",
         "cron": "^1.8.2",
         "discord.js": "^12.5.1",
